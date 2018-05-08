@@ -1,5 +1,5 @@
 <?php
-namespace fky;
+namespace fky\func;
 require __DIR__.'/../class/ihttp.class.php';
 //设置微信公众号模版消息
 /*  IT科技	互联网/电子商务	1

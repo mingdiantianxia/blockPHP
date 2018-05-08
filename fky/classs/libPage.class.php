@@ -1,5 +1,5 @@
 <?php
-namespace fky;
+namespace fky\classs;
 /**
  * show(2)  1 ... 62 63 64 65 66 67 68 ... 150
  * 分页样式 

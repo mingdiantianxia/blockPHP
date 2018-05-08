@@ -1,5 +1,5 @@
 <?php
-namespace fky;
+namespace fky\classs;
 class FileCache{
 	private $_dir;
 	const EXT ='.txt';

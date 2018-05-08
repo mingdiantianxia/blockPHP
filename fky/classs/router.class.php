@@ -1,5 +1,5 @@
 <?php
-namespace fky;
+namespace fky\classs;
 require_once(__DIR__.'/../inc/router/autoload.php');
 use \marcfowler\macaw\Macaw;
 

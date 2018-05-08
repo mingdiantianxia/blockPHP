@@ -1,4 +1,5 @@
 <?php 
+namespace fky\func;
 /**
  *  作用：array转xml
  */

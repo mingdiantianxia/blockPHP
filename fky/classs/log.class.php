@@ -1,5 +1,5 @@
 <?php 
-namespace fky;
+namespace fky\classs;
 require __DIR__.'/../inc/wechat/autoload.php';
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;

@@ -5,4 +5,5 @@ date_default_timezone_set('PRC');
 loadc('db',$config['db']);
 loadc('template');
 loadc('Router');
+loadc('loader')->run();
 require 'router/router.php';

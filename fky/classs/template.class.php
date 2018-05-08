@@ -1,5 +1,5 @@
 <?php 
-namespace fky;
+namespace fky\classs;
 require_once(__DIR__.'/../inc/template/autoload.php');
 class Template extends \terranc\Blade\Factory{
 	public function __construct(array $params = array()){

@@ -1,5 +1,5 @@
 <?php 
-namespace fky;
+namespace fky\classs;
 require_once(__DIR__.'/../inc/img/autoload.php');
 use Gregwar\Image\Image;
 class Img extends Image{

@@ -1,5 +1,5 @@
 <?php
-namespace fky;
+namespace fky\classs;
 /**
  * 发送HTTP/HTTPS请求的类[支持批量异步GET(POST)请求,支持服务器代理]
  *

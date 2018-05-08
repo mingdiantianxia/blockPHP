@@ -1,5 +1,5 @@
 <?php 
-namespace fky;
+namespace fky\classs;
 require __DIR__.'/../inc/db/Medoo.php';
 
 class Db extends \Medoo\Medoo{

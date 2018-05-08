@@ -1,5 +1,5 @@
 <?php 
-namespace fky;
+namespace fky\classs;
 require __DIR__.'/fstring.class.php';
 require_once(__DIR__.'/../inc/OAuth/autoload.php');
 use OAuth2\Server;

@@ -7,12 +7,12 @@ function loadf($name='', $params = array()){
 	if ($name == '') {
 		die('function name is empty!');
 	} else {
-	    $func =  dirname(__FILE__).'/func/' . strtolower($name) . '.func.php';
+	    $func =  dirname(__FILE__).DIRECTORY_SEPARATOR.'func'.DIRECTORY_SEPARATOR. strtolower($name) . '.func.php';
 	    if (!is_file($func)) {
 	        die(' function ' . $name . ' Not Found!');
 	    }
 	    require $func;
-	    $function = 'fky\\'.$name;
+	    $function = 'fky'.DIRECTORY_SEPARATOR.'func'.DIRECTORY_SEPARATOR.$name;
 	    if (!empty($params)) {
 	    	return $function($params);
 	    } else { 
@@ -31,12 +31,12 @@ function loadc($name='', $params = array()){
 	   if (isset($fky_class[$name])) {
 	        return $fky_class[$name];
 	    }
-	    $class =  dirname(__FILE__).'/class/' . strtolower($name) . '.class.php';
+	    $class =  dirname(__FILE__).DIRECTORY_SEPARATOR.'classs'.DIRECTORY_SEPARATOR. strtolower($name) . '.class.php';
 	    if (!is_file($class)) {
 	        die(' class ' . $name . ' Not Found!');
 	    }
 	    require $class;
-	    $class_name = 'fky\\'.ucfirst($name);
+	    $class_name = 'fky'.DIRECTORY_SEPARATOR.'classs'.DIRECTORY_SEPARATOR.ucfirst($name);
 	    if (!empty($params)) {
 	   	    $fky_class[$name] = new $class_name($params);
 	    } else {

@@ -1,5 +1,5 @@
 <?php
-namespace fky;
+namespace fky\func;
 //定义输入检查函数
 function input($data) {
 	//（通过 PHP trim() 函数）去除用户输入数据中不必要的字符（多余的空格、制表符、换行）

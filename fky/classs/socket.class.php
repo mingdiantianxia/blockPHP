@@ -1,5 +1,5 @@
 <?php
-namespace fky;
+namespace fky\classs;
 require_once(__DIR__.'/../inc/socket/class.PHPWebSocket.php');
 class Socket extends PHPWebSocket{
 	function __construct(array $params = array()){

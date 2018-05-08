@@ -1,5 +1,5 @@
 <?php 
-namespace fky;
+namespace fky\classs;
 require __DIR__.'/../inc/predis/autoload.php';
 use Predis;
 class Redis extends Predis\Client{

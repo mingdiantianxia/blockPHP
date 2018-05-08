@@ -1,5 +1,5 @@
 <?php
-namespace fky;
+namespace fky\classs;
 class Api{
 	const JSON="json";
 	/**
