@@ -1,0 +1,10 @@
+{
+  "require": {
+    "marcfowler/macaw": "dev-master"
+  },
+  "autoload": {
+     "psr-4": {
+            "" : ""
+        }
+  }
+}
