@@ -11,7 +11,7 @@ function loadf($name='', $params = array()){
 	    if (!is_file($func)) {
 	        die(' function ' . $name . ' Not Found!');
 	    }
-	    require $func;
+	    require_once $func;
 	    $function = 'fky'.DIRECTORY_SEPARATOR.'func'.DIRECTORY_SEPARATOR.$name;
 	    if (!empty($params)) {
 	    	return $function($params);
@@ -35,7 +35,7 @@ function loadc($name='', $params = array()){
 	    if (!is_file($class)) {
 	        die(' class ' . $name . ' Not Found!');
 	    }
-	    require $class;
+	    require_once $class;
 	    $class_name = 'fky'.DIRECTORY_SEPARATOR.'classs'.DIRECTORY_SEPARATOR.ucfirst($name);
 	    if (!empty($params)) {
 	   	    $fky_class[$name] = new $class_name($params);
