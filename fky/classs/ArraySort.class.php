@@ -2,7 +2,7 @@
 namespace fky\classs;
 
 /**
- * @author fukaiyao
+ * @author mingdiantianxia
  * 数组排序类
  */
  
