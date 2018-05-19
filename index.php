@@ -7,4 +7,7 @@ loadc('db',$config['db']);
 loadc('template');
 loadc('Router');
 loadc('loader')->run();
+$GPC = loadf('call:GPC');
+var_dump($GPC('good'));die;
+
 require 'router/router.php';

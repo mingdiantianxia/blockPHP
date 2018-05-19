@@ -16,7 +16,7 @@
                $callf = explode(':', $name);
                $name = $callf[1];
             }
-            $func =  dirname(__FILE__).DIRECTORY_SEPARATOR.'func'.DIRECTORY_SEPARATOR. strtolower($name) . '.func.php';
+            $func =  dirname(__FILE__).DIRECTORY_SEPARATOR.'func'.DIRECTORY_SEPARATOR. $name . '.php';
 
             if (!is_file($func)) {
                 die(' function ' . $name . ' Not Found!');
@@ -44,13 +44,13 @@
         if (isset($fky_modules[$name])) {
             return $fky_modules[$name];
         }
-        $class =  dirname(__FILE__).DIRECTORY_SEPARATOR.'classs'.DIRECTORY_SEPARATOR. strtolower($name) . '.class.php';
+        $class =  dirname(__FILE__).DIRECTORY_SEPARATOR.'classs'.DIRECTORY_SEPARATOR. $name . '.php';
 
         if (!is_file($class)) {
             die(' class ' . $name . ' Not Found!');
         }
         require_once $class;
-        $class_name = 'fky'.DIRECTORY_SEPARATOR.'classs'.DIRECTORY_SEPARATOR.ucfirst($name);
+        $class_name = 'fky'.DIRECTORY_SEPARATOR.'classs'.DIRECTORY_SEPARATOR.$name;
 
         $class_name = new \ReflectionClass($class_name);//反射类
         $fky_modules[$name] = $class_name->newInstanceArgs($arguments);//传入参数

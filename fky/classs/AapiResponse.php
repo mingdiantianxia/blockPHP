@@ -1,7 +1,6 @@
 <?php
 namespace fky\classs;
-class Api{
-	const JSON="json";
+class ApiResponse{
 	/**
 	 * [show description]
 	 * @param  integer $code   [状态码]
@@ -10,26 +9,25 @@ class Api{
 	 * @param  string $type    [数据类型]
 	 * @return string         
 	 */
-	public static function show($code='',$message='',$data=array(),$type=self::JSON){
+	public function show($code,$message='',$data=array(),$type="json"){
 		if (!is_numeric($code)) {
 				return;
 		}
 
 		$type=isset($_GET['format'])?$_GET['format']:$type;
-
-		if ($type=='json') {
-			self::json($code,$message,$data);
-			exit;
-		}elseif ($type=='array') {
-			$result=array(
+		$result=array(
 				'code'=>$code,
 				'message'=>$message,
 				'data'=>$data
 			);
+		if ($type=='json') {
+			$this->json($code,$message,$data);
+			exit;
+		}elseif ($type=='arr') {
 			var_dump($result);
-			die;
+			exit;
 		}elseif ($type=='xml') {
-			self::xmlEncode($code,$message,$data);
+            $this->xmlEncode($code,$message,$data);
 			exit;
 		}else{
 			//其他方法
@@ -45,7 +43,7 @@ class Api{
 	 * @param  array  $data    [数据]
 	 * @return string    
 	  */
-	 public static function  json($code,$message='',$data=array()){
+	 public function json($code,$message='',$data=array()){
 	 	if (!is_numeric($code)) {
 				return ''; 		
 	 	}
@@ -54,8 +52,7 @@ class Api{
 	 			'message'=>$message,
 	 			'data'=>$data
 	 		);
-	 	// echo urldecode(json_encode(urlencode($result)));
-	 	echo json_encode($result);
+         echo urldecode(json_encode($this->returnParams($result)));
 	 	exit;
 
 	 }
@@ -67,7 +64,7 @@ class Api{
 	 * @param  array  $data    [数据]
 	 * @return string         
 	 */
-	public static function xmlEncode($code,$message='',$data=array()){
+	public function xmlEncode($code,$message='',$data=array()){
 		if (!is_numeric($code)) {
 				return '';
 		}
@@ -78,9 +75,9 @@ class Api{
 
 			);
 		header('Content-Type:text/xml');
-		$xml.="<?xml version='1.0' encoding='UTF-8'?>\n";
+		$xml ="<?xml version='1.0' encoding='UTF-8'?>\n";
 		$xml.="<root>\n";
-		$xml.=self::xmlToEncode($result);
+		$xml.=$this->xmlToEncode($result);
 		$xml.="</root>";
 		echo $xml;
 	}
@@ -89,7 +86,7 @@ class Api{
 	 * @param  array $data [数据]
 	 * @return string       
 	 */
-	public static function xmlToEncode($data){
+	public function xmlToEncode($data){
 		$xml=$attr="";
 		foreach ($data as $key => $value) {
 			if (is_numeric($key)) {
@@ -97,10 +94,42 @@ class Api{
 				$key="item";
 			}
 			$xml.="<{$key}{$attr}>";
-			$xml.=is_array($value)?self::xmlToEncode($value):$value;
+			$xml.=is_array($value)?$this->xmlToEncode($value):$value;
 			$xml.="</{$key}>\n";
 		}
 		return $xml;
 	}
+
+    /**
+     * 返回经过地址加密的参数，用于支持json中文
+     * @param $params
+     * @param bool $tokey 应用到key
+     * @return string
+     */
+    public function returnParams($params, $tokey = true)
+    {
+        if (is_array($params)) {
+            foreach ($params as $key => $value){
+                if (is_array($value)) {
+                    $params[$key] = $this->returnParams($value);
+                }
+                else {
+                    $params[$key] = urlencode($value);
+                }
+                if ($tokey && is_string($key)) {
+                    $new_key = urlencode($key);
+
+                    if ($new_key != $key) {
+                        $params[$new_key] = $params[$key];
+                        unset($params[$key]);
+                    }
+                }
+            }
+	} else {
+            $params = urlencode($params);
+        }
+
+        return $params;
+    }
 }
 
