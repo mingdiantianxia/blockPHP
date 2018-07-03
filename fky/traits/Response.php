@@ -1,6 +1,12 @@
 <?php
-namespace fky\classs;
-class ApiResponse{
+namespace fky\traits;
+/**
+ * Created by PhpStorm.
+ * User: fukaiyao
+ * Date: 2018/5/05/026
+ * Time: 11:08
+ */
+trait Response{
 	/**
 	 * [show description]
 	 * @param  integer $code   [状态码]
@@ -9,7 +15,7 @@ class ApiResponse{
 	 * @param  string $type    [数据类型]
 	 * @return string         
 	 */
-	public function show($code,$message='',$data=array(),$type="json"){
+	public function showResponse($code,$message='',$data=array(),$type="json"){
 		if (!is_numeric($code)) {
 				return;
 		}
@@ -52,6 +58,7 @@ class ApiResponse{
 	 			'message'=>$message,
 	 			'data'=>$data
 	 		);
+         @header("Content-Type: text/json; charset=UTF-8");
          echo urldecode(json_encode($this->returnParams($result)));
 	 	exit;
 
@@ -132,4 +139,3 @@ class ApiResponse{
         return $params;
     }
 }
-
