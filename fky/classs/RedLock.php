@@ -1,5 +1,5 @@
 <?php
-namespace lwm\commons\base;
+namespace fky\classs;
 /**
  * redis分布式锁
  * @author fukaiyao 2018-07-02
