@@ -11,6 +11,9 @@ class TestController extends \controllers\BaseController
   
   public function test()
   {
+  	// $test2 = new Test2Controller();
+  	// $test2->test();
+
   	 $data = loadc('db')->select("wx_pintuan_setting", "*",['LIMIT'=>20]);
   	 // $this->showResponse(200,'',$data,'arr');
 

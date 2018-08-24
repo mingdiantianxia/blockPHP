@@ -1,10 +1,10 @@
 <?php
 namespace fky\classs;
 /**
-    自动加载类
-    使用方法
-    include_once 'Loader.php'; // 引入加载器
-    \fky\classs\Loader::run();
+*自动加载类
+*使用方法
+*include_once 'Loader.php'; // 引入加载器
+*\fky\classs\Loader::run();
 */
 class Loader
 {

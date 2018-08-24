@@ -120,6 +120,13 @@ class RedLock
 
     private function unlockInstance($instance, $resource, $token)
     {
+        // $token1 = $instance->get($resource);
+        // if ($token1 == $token) {
+        //     return $instance->delete($resource);
+        // } else {
+        //     return 0;
+        // }
+
         $script = '
             if redis.call("GET", KEYS[1]) == ARGV[1] then
                 return redis.call("DEL", KEYS[1])
