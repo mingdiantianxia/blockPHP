@@ -1,3 +1,4 @@
+<script src="store.js"></script>
 <template>
   <div id="app">
   <h1 v-text='title'></h1>

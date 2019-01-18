@@ -89,7 +89,7 @@ class Phpredis
         }
 
         //序列化
-        $this->_redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
+        // $this->_redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
         return $ret;
     }
 
@@ -137,7 +137,7 @@ class Phpredis
         }
 
         //序列化
-        $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
+        // $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
         $redis->select($db_table);
 
         $redis_table_instance[$db_table] = $redis;
@@ -1188,6 +1188,33 @@ class Phpredis
     protected function setValue($key, $value, $expire)
     {
         return $this->set($key, $value, $expire);
+    }
+
+    /**
+     * 事务开始
+     * @return \Redis
+     */
+    public function multi()
+    {
+        return $this->_redis->multi();
+    }
+
+    /**
+     * 事务执行
+     * @return \Redis
+     */
+    public function exec()
+    {
+        return $this->_redis->exec();
+    }
+
+    /**
+     * 事务取消
+     * @return \Redis
+     */
+    public function discard()
+    {
+        return $this->_redis->discard();
     }
 
     public function __call($method, $args = array()) {
