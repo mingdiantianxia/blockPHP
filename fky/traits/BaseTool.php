@@ -111,16 +111,5 @@ trait BaseTool {
 
     }
 
-    /**
-     * 获取毫秒的时间戳
-     * @return mixed
-     */
-    public function getMicrotime()
-    {
-        $time = explode(" ", microtime());
-        $time = $time[1] . ($time[0] * 1000);
-        $time2 = explode(".", $time);
-        return $time2[0];
-    }
 
 }

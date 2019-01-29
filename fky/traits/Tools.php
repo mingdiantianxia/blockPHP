@@ -73,6 +73,18 @@ trait Tools{
 		return sprintf('%.0f',(floatval($t1)+floatval($t2))*1000);;
 	}
 
+    /**
+     * 获取毫秒的时间戳
+     * @return mixed
+     */
+    public function getMicrotime()
+    {
+        $time = explode(" ", microtime());
+        $time = $time[1] . ($time[0] * 1000);
+        $time2 = explode(".", $time);
+        return $time2[0];
+    }
+
 	//判断是否来自微信的访问
 	public function IsWechat()
 	{

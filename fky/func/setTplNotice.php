@@ -28,7 +28,7 @@ function setTplNotice($params = array())
 	if (empty($token)) {
 		die('缺少公众号token参数');
 	}
-	$ihttp = new Ihttp;
+	$ihttp = new \fky\classs\Ihttp;
 	if ($set_industry) {
 		$url = "https://api.weixin.qq.com/cgi-bin/template/api_set_industry?access_token=".$token;
 		$todata = array(
