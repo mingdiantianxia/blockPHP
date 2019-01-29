@@ -7,4 +7,3 @@ loadc('Router')->error(function(){
   echo '404::Not Found！';
 });
 loadc('Router')->dispatch();
- ?>
