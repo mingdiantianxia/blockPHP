@@ -14,9 +14,10 @@ class TestController extends \controllers\BaseController
   	// $test2 = new Test2Controller();
   	// $test2->test();
 
-  	 $data = loadc('db')->select("wx_pintuan_setting", "*",['LIMIT'=>20]);
+  	  $data = loadc('db')->select("wx_pintuan_setting", "*",['LIMIT'=>20]);
   	 // $this->showResponse(200,'',$data,'arr');
+      //  	 $response = loadc('HttpRequest')->GET('https://hao.360.cn/?360safe');
 
-	echo loadc('template')->make('admin/hello', ['a' => 'blockPHP测试页', 'time' => time()])->render();
+      echo loadc('template')->make('admin/hello', ['a' => 'blockPHP测试页', 'time' => time()])->render();
   }
 }
