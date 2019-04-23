@@ -1,12 +1,11 @@
 <?php
-namespace lwm\commons\base;
-use lwmf\datalevels\Redis;
+namespace fky\classs;
 
 /**
  * redis锁
  * @author fukaiyao 2018-07-02
  */
-class RedLock
+class RedisLock
 {
     private static $_instance = null;
 
@@ -24,7 +23,7 @@ class RedLock
      */
     function __construct()
     {
-        $this->_redis = Redis::getInstance();
+        $this->_redis = Phpredis::getInstance();
 
         //默认取锁等待3~6秒
         $this->retryDelay = 160; //每次取锁最大延迟毫秒数，最小延迟为此值的一半
@@ -36,7 +35,7 @@ class RedLock
     {
         if(self::$_instance == null)
         {
-            self::$_instance = new RedLock();
+            self::$_instance = new RedisLock();
         }
         return self::$_instance;
     }

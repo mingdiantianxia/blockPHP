@@ -100,7 +100,7 @@ class Phpredis
     public static function getInstance()
     {
         if (null === self::$_instance) {
-            self::$_instance = new Redis();
+            self::$_instance = new Phpredis();
         }
         return self::$_instance;
     }

@@ -13,6 +13,7 @@ class TestController extends \controllers\BaseController
   {
   	// $test2 = new Test2Controller();
   	// $test2->test();
+  	loadc('log')->info('good',['good1','good2']);
 
   	  $data = loadc('db')->select("wx_pintuan_setting", "*",['LIMIT'=>20]);
   	 // $this->showResponse(200,'',$data,'arr');

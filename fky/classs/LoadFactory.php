@@ -1,18 +1,18 @@
 <?php 
- // namespace lwm\commons\base;
+ namespace fky\classs;
 
  /**
   * 函数和类，统一加载类
-  * Class LoadFC
+  * Class LoadFactory
   */
- class LoadFC
+ class LoadFactory
  {
      private static $_instance = null;
 
      private static $modules = array();
 
      //项目根目录
-     private static $baseDir = __DIR__;
+     private static $baseDir = __DIR__ .DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
 
      //根目录命名空间
      private static $baseNamespace = 'fky';
