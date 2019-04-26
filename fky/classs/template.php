@@ -14,10 +14,10 @@ class Template extends \terranc\Blade\Factory{
 		}					
 		$compiler = new \terranc\Blade\Compilers\BladeCompiler($params['cachePath']);
 		//修改定界符，指令符号@也已经在bladeCompiler.php文件中(大约在248、259行)修改成'@>',不解析符不变@
-		// $compiler->setRawTags('<{!!','!!}>');
-		// $compiler->setContentTags('<{{','}}>');
-		// $compiler->setEscapedContentTags('<{{{','}}}>');
-		$compiler->directive('datetime', function($timestamp) {
+		$compiler->setRawTags('<{!!','!!}>');//原样输出
+		$compiler->setContentTags('<{{','}}>');
+		$compiler->setEscapedContentTags('<{{{','}}}>');//转义定界符
+		$compiler->directive('datetime', function($timestamp) { //定义指令
 			return "<?php echo date('Y-m-d h:i:s',$timestamp); ?>";
 		});
 		$engine = new \terranc\Blade\Engines\CompilerEngine($compiler);

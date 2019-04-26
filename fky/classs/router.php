@@ -5,8 +5,11 @@ use \marcfowler\macaw\Macaw;
 
 class Router extends Macaw{
 	public function __construct(){
-
+		parent::haltOnMatch(true);
 	} 
+	public static function any($router = '/', $callback = ''){
+		parent::ANY($router, $callback);
+	}
 	public static function get($router = '/', $callback = ''){
 		parent::get($router, $callback);
 	}
