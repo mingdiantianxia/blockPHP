@@ -262,8 +262,9 @@ $(function(){
             mysearch:function(){
                 if (this.url && this.search_type) {
                     $('#sh').show();
-                    $('#sh-2').html($('#router-url').html());
-                    // 
+                    // $('#sh-2').html($('#router-url').html());
+                    $('#sh-2').html('<a class="btn btn-success lg" href="/" style="margin: 10px;">返回</a>');
+                    //
                     $('#sh').append('<iframe src="'+this.search_url[this.search_type]+this.url+'" data-iframe="my" width="100%" height="100%" scrolling="yes" frameborder="0" marginwidth="0" marginheight="0" border="0" style="width: 100vw;height:  200vh; position:absolute;"></iframe>');
                     $("iframe[name='showframe']").attr("src", '');
                      // $('#kj').hide();
