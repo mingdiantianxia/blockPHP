@@ -18,4 +18,3 @@ class Redis extends Predis\Client{
 
 
 
- ?>
