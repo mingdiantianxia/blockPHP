@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<!-- @author fky -->
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>MyVIP</title>
+    <meta name="keywords" content="vip解析">
+    <meta name="description" content="vip解析">
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!--<link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">-->
+    <!--[if lt IE 9]>
+　　<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+　　<script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+<style type="text/css">
+    @media screen and (max-width: 500px) {
+        #player,#player_logo{
+            height:50vh;
+        }
+    }
+    @media screen and (min-width: 500px){
+        #player,#player_logo {
+            height:75vh;
+        }
+
+        #router-url {
+            height: 55px;
+            overflow: hidden;
+            /*元素样式改变，过渡需要花费 0.5 秒*/
+            transition: all linear 0.5s;
+        }
+
+        @keyframes myChange {
+            from {
+               height: 55px;
+            } to {
+                height: 215px;
+            }
+        }
+        #router-url:hover {
+            animation: 0.5s myChange;
+            height: unset;
+        }
+    }
+</style>
+</head>
+<body background="" style="padding-top: 50px">
+<div id="sh" class="col-md-12" style="z-index: 999;display: none;">
+    <div id="sh-2" class="input-group" style="width: 100%;text-align: center;">
+    </div>
+</div>
+<div id="app" class="col-xs-12 col-sm-10 col-md-8 col-lg-7 center-block" style="float: none;">
+    <div class="container">
+        <nav class="navbar navbar-fixed-top navbar-default">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#"><strong>繁空园</strong>-vip视频在线解析</a>
+                </div>
+                <div id="navbar" class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="https://www.fankongyuan.com" target="_blank" style="color: red;">繁空园</a></li>
+                        <li><a class="btn2 goto" data-type='zhibo' href="http://www.yswhw.cn/live.php" target="showframe">电视直播</a></li>
+                        <li><button type="button" class="btn btn-default navbar-btn navbar-right dengclose">关灯</button></li>
+                    </ul>
+                </div>
+
+            </div>
+        </nav>
+    </div>
+    <br>
+
+    <div class="f4" style="text-align: center;display: block;">
+        <div class="input-group" style="width: 100%;">
+            <!-- <span class="input-group-addon input-lg" style="width: 80px;">播放地址</span> -->
+            <!-- <span class="input-group-addon" style="width: 130px;padding: 0;">
+                <select class="input-group-addon input-lg" style="width: 130px;height: 100%;border: 0;" v-model="search_type">
+                     <option value="0">播放地址</option>
+                     <option value="1">360搜索</option>
+                     <option value="2">腾讯搜索</option>
+                     <option value="3">优酷搜索</option>
+                </select>
+            </span> -->
+            <span class="input-group-btn" style="width: 160px;padding: 0;">
+                    <select class="form-control input-lg"  v-model="search_type">
+                     <option value="1">360综合搜索</option>
+                     <option value="2">360视频搜索</option>
+                     <option value="3">腾讯搜索</option>
+                     <option value="4">优酷搜索</option>
+                     <option value="5">爱奇艺搜索</option>
+                     <option value="6">百度搜索</option>
+                     <option value="7">网盘搜索</option>
+                    </select>
+            </span>
+
+            <input class="form-control input-lg" id="url" type="search" placeholder="电脑使用Ctrl+V粘贴网址-手机直接长按粘贴网址" v-model="url">
+            <span class="btn btn-success input-group-addon input-lg" v-on:click="mysearch" style="margin: 10px;">搜索</span>
+        </div>
+           
+        <br>
+        <div id="router-url" class="" style="width: 100%;">
+            <a class="btn btn2  btn-success lg" v-for="(item, index) in xianlu" v-bind:href="item.url+url" v-bind:data-xianlu="item.url" v-bind:title="item.title" data-toggle="tooltip" rel="nofollow" target="showframe" style="margin: 10px;">线路{{ index+1 }}</a>
+            <a class="btn btn2  btn-success lg" data-type='zhibo' href="http://www.yswhw.cn/live.php" rel="nofollow" target="showframe" style="margin: 10px;">电视直播</a>
+        </div>
+        <br>
+
+    </div>
+    <div class="col-xs-12 col-md-12 f1">
+        <div class="col-xs-12 col-md-12 panel panel-default">
+            <div id="kj" class="col-xs-12 col-md-12 panel-body"  style="padding-right: 0px;padding-left: 0px;">
+                <div id="player_logo" style="width: 100%;background: #000000;display:block;position: absolute;right: 0px;top:16px;color:#f5f5f5;text-align: center;">
+                    <p id="fenhao" style="position:relative;top:30vh;font-size: 5vw;display:none;">非法调试，封ip一天！</p>
+                </div>
+               <div class="check-url" style="width: 100%;background: #000;display:none;position: absolute;right: 0px;top:11vh;;color:#f5f5f5;text-align: center;">
+                    <img style="max-width: 95%;" src='http://note.youdao.com/yws/api/personal/file/WEB3088e9e48f85bbef3bf258f7b0224992?method=download&inline=true&shareKey=5e9cdc31211077dfca24dc267af04346' alt="">
+                </div>
+                 <!--<iframe name='showframe' style="margin-top:1px;background:#000 url('http://note.youdao.com/yws/api/personal/file/WEB3088e9e48f85bbef3bf258f7b0224992?method=download&inline=true&shareKey=5e9cdc31211077dfca24dc267af04346') no-repeat center;" id="player" width="100%" height="600px" allowTransparency="true" allowfullscreen="true" frameborder="0" scrolling="no" ></iframe>-->
+                <iframe name='showframe' style="margin-top:1px;background:#000;" id="player" data-iframe="my" width="100%" height="600px" allowTransparency="true" allowfullscreen="true" frameborder="0" scrolling="yes" src=""></iframe>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-12 col-md-12 f2" style="text-align: center;border: solid #5bc0de 1px;background: #f8f8f8;display: block;">
+        <div class="language">
+        <h3>选集</h3>
+            <a class="btn btn3 btn-info btn-sm" v-for="(item, index) in video_list" v-bind:href="current_xianlu+item.url"  rel="nofollow" target="showframe" style="margin: 3px;">{{ item.num }}</a>
+            
+        </div>
+    </div>
+    <div  class="col-xs-12 col-md-12 f3" style="text-align: center;display: block;">
+        <div class="language">
+            <a class="btn  btn-success lg" href="http://www.le.com/" rel="nofollow" target="_blank" style="margin: 10px;">进入乐视视频</a>
+            <a class="btn  btn-success lg" href="http://www.iqiyi.com/" rel="nofollow" target="_blank" style="margin: 10px;">进入奇艺视频</a>
+            <a class="btn  btn-success lg" href="http://www.mgtv.com/" rel="nofollow" target="_blank" style="margin: 10px;">进入芒果视频</a>
+            <a class="btn  btn-success lg" href="http://www.tudou.com/" rel="nofollow" target="_blank" style="margin: 10px;">进入土豆视频</a>
+            <br>
+            <a class="btn  btn-success lg" href="http://v.qq.com/" rel="nofollow" target="_blank" style="margin: 10px;">进入腾讯视频</a>
+            <a class="btn  btn-success lg" href="http://www.youku.com/" rel="nofollow" target="_blank" style="margin: 10px;">进入优酷视频</a>
+            <a class="btn  btn-success lg" href="http://tv.sohu.com/" rel="nofollow" target="_blank" style="margin: 10px;">进入搜狐视频</a>
+            <a class="btn  btn-success lg" href="http://www.pptv.com/" rel="nofollow" target="_blank" style="margin: 10px;">进入pptv视频</a>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+// document.write('<iframe src="http://www.yswhw.cn/live.php" width="100%" height="600px" scrolling="no" frameborder="0" marginwidth="0" marginheight="0" border="0"></iframe>');
+$(function(){
+    var app = new Vue({ 
+        el: '#app',
+        data: {
+            url: '',
+            current_xianlu:'http://api.hlglwl.com/jx.php?url=',
+            xianlu:[
+                {'url':"http://api.hlglwl.com/jx.php?url=", title: "腾讯,优酷,爱奇艺(不稳定)" },
+                {'url':"https://jiexi.071811.cc/jx.php?url=", title: "综合线路" },
+                {'url':"http://q.z.vip.totv.72du.com/?url=", title: "综合线路" },
+                {'url':"http://jx.52dgm.cn/?url=", title: "" },
+                {'url':"http://jiexi.92fz.cn/player/vip.php?url=", title: "" },
+                {'url':"http://jx.aeidu.cn/index.php?url=", title: "" },
+                {'url':"https://jx.wslmf.com/?url=", title: "(支持B站)" },
+                {'url':"http://jx.ot7.cn/?url=", title: "(支持B站)" },
+                {'url':"http://jqaaa.com/jq3/?url=", title: "" },
+                {'url':"https://yun.odflv.com/?url=", title: "" },
+                {'url':"http://app.baiduoos.cn:2019/vip/?url=", title: "" },
+                {'url':"https://jx.wawakj.top/?url=", title: "" },
+                {'url':"https://api.sigujx.com/?url=", title: "" },
+                {'url':"http://api.oopw.top/?url=", title: "综合线路(支持B站)" },
+                { url: "http://www.sfsft.com/admin.php?url=", title: "综合线路" },
+                { url: "http://www.wmxz.wang/video.php?url=", title: "综合线路" },
+
+                { url: "http://jx.598110.com/zuida.php?url=", title: "综合线路" },
+                { url: "http://jx.598110.com/duo/index.php?url=", title: "综合线路" },
+                { url: "http://jx.598110.com/index.php?url=", title: "综合线路" },
+                { url: "http://jx.598110.com/?url=", title: "综合线路" },
+
+                { url: "http://jx.zzit.cc/tv.php?url=", title: "" },
+                { url: "http://www.1717yun.com/jx/ty.php?url=", title: "" },
+                { url: "http://vip.jlsprh.com/v/4.php?url=", title: "" },
+                { url: "https://z1.m1907.cn/?jx=", title: "综合线路" },
+                { url: "https://jqaaa.com/jx.php?url=", title: "综合线路" },
+                { url: "https://ejiafarm.com/jx.php?url=", title: "" },             
+                { url: "https://030e.com/0302/?url=", title: "综合线路" },
+                { url: "http://api.smq1.com/?url=", title: "" },
+                { url: "http://api.zuilingxian.com/jiexi.php?url=", title: "" },
+                { url: "http://www.luckyblank.cn/wuxinjx/?url=", title: "" },
+                { url: "http://api.wlzhan.com/sudu/?url=", title: "" },
+                { url: "http://beaacc.com/api.php?url=", title: "综合线路" },
+                { url: "http://2gty.com/apiurl/yun.php?url=", title: "综合线路(支持B站)" },
+                { url: "http://jx.anlehe.com/jx.php?url=", title: "综合线路" },
+                { url: "http://jx.cesms.cn/?url=", title: "综合线路(支持B站)" },
+
+                { url: "https://jx.618g.com/?url=", title: "综合线路" },
+                { url: "https://jx.hezeshi.net/ce/jlexi.php?url=", title: "" },
+                { url: "http://api.7kki.cn/api/?url=", title: "腾讯" },
+                { url: "https://cdn.yangju.vip/k/?url=", title: "综合线路" },
+                { url: "https://www.myxin.top/jx/api/?url=", title: "综合线路" },
+                { url: "http://jx.ovov.cc/?url=", title: "综合线路" },
+                { url: "http://jx.618ge.com/?url=", title: "综合线路" },
+            ],
+            search_type:1,
+            search_url:{
+                1:'https://www.so.com/s?q=',
+                2:'https://video.360kan.com/v?q=', 
+                3:'https://v.qq.com/x/search/?q=',
+                4:'https://so.youku.com/search_video/q_',
+                5:'http://so.iqiyi.com/so/q_',
+                6:'https://www.baidu.com/s?wd=',
+                7:'http://www.pansoso.com/zh/'
+            },
+            video_list:[],
+        },
+        created:function(){
+            console.log(this);
+        },
+        methods: {
+            checkUrl:function(this_el,event){
+                if (this_el.data("type") == 'zhibo') {
+                    $('#sh').hide();
+                    $('.check-url').hide();
+                     // $('#kj').show();
+                     xldata();
+                } else {
+                    if (!this.url) {
+                        $('#sh').hide();
+                         // $('#kj').show();
+                        $('.check-url').show();
+                        event.preventDefault();//阻止默认事件
+                        setTimeout(function () {
+                            $('.check-url').hide();
+                        }, 1500);
+                    } 
+                    else {
+                        this.current_xianlu = this_el.data("xianlu");
+                        $('#sh').hide();
+                        $('.check-url').hide();
+                        window.localStorage.setItem('temp_url', this.url);
+                         // $('#kj').show();
+                         xldata();
+
+                        // var video_list_data = JSON.parse(window.sessionStorage.getItem('video_list') || '[]');
+                        // if (video_list_data) {
+          //                this.video_list = video_list_data.data;
+                        // };
+                        $.ajax({
+                            url: "<?php echo loadf('getHost'); ?>videolist?url="+this.url,
+                            type: "post",
+                            data: {},
+                            dataType: "json",
+                            success: function (data) {
+                                if (data) {
+                                    app.video_list = data.data;
+                                    window.sessionStorage.setItem('video_list', JSON.stringify(data));
+                                }
+                            }
+                        })
+                    }
+                   
+                }
+            },
+            mysearch:function(){
+                if (this.url && this.search_type) {
+                    $('#sh').show();
+                    $('#sh-2').html($('#router-url').html());
+                    // 
+                    $('#sh').append('<iframe src="'+this.search_url[this.search_type]+this.url+'" data-iframe="my" width="100%" height="100%" scrolling="yes" frameborder="0" marginwidth="0" marginheight="0" border="0" style="width: 100vw;height:  200vh; position:absolute;"></iframe>');
+                    $("iframe[name='showframe']").attr("src", '');
+                     // $('#kj').hide();
+                    checkUrl();
+                }
+            },
+        }
+    });
+
+    $('.dengclose').on('click', function(event) {
+        if ($(this).text() == '开灯') {
+            $('body').css({background: ''});
+            $(this).text('关灯');
+        } else {
+            $('body').css({background: '#000000'});
+            $(this).text('开灯');
+        }
+        
+    });
+
+    function checkUrl(){
+        $('.btn2').on('click',function (e) {
+            app.checkUrl($(this),e);
+        });
+    }
+    app.url = window.localStorage.getItem('temp_url');
+    checkUrl();
+
+    function xldata(){
+        $('#player_logo').show();
+
+        setTimeout(function(){
+            $('#player_logo').hide();
+        }, 1500);
+    }
+
+    //禁止F12
+    window.onkeydown = window.onkeyup = window.onkeypress = function (event) {
+       // 判断是否按下F12，F12键码为123
+       // if (event.keyCode === 123) {
+       //    event.preventDefault(); // 阻止默认事件行为
+       //    window.event.returnValue = false;
+       // }
+       // if (event.shiftKey && event.ctrlKey && event.keyCode === 73) {
+       //     event.preventDefault(); // 阻止默认事件行为
+       //    window.event.returnValue = false;
+       // }
+       if (event.keyCode === 13) {
+           app.mysearch();
+       }
+       // if (event.ctrlKey && event.keyCode === 83 ) {
+       //     event.preventDefault(); // 阻止默认事件行为
+       //    window.event.returnValue = false;
+       // }
+       // //屏蔽Shift+F10
+       // if((e.shiftKey) && (e.keyCode === 121)){
+       //     event.preventDefault(); // 阻止默认事件行为
+       //    window.event.returnValue = false;
+       // }
+    }
+
+    $("[data-toggle='tooltip']").tooltip(); 
+
+});
+
+var threshold = 160; // 打开控制台的宽或高阈值
+// 每秒检查一次
+setInterval(function() {
+    if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
+        // 如果打开控制台，则刷新页面
+        // window.location.reload();
+        //window.location.href = 'http://baidu.com/';
+    consoleOpenCallback();
+    }
+    $('iframe').each(function(e){
+        if($(this).data('iframe') != 'my') {
+            $(this).remove();
+        }
+    });
+}, 1000);
+
+//禁止右键
+// function Click(){
+//     //alert('版权所有(C)2018 繁空园');
+//     window.event.returnValue=false;
+// }
+// document.oncontextmenu=Click;
+
+/**
+ * 控制台打开的时候回调方法
+ */
+function consoleOpenCallback(){
+    var date = new Date();
+    var year = date.getFullYear();
+    var month = date.getMonth()+1;//js从0开始取 
+    var day = date.getDate(); 
+     
+    var flag = year+"-"+month+"-"+day;
+    window.localStorage.setItem('http://baidu.com/good3', flag);
+    // $('#fenhao').show();
+    // setTimeout(function(){
+    //     clear('非法调试，封ip一天！');
+    // },1000);
+    // setInterval(function(){
+    //         window.location.href = 'http://baidu.com/';
+    // }, 1000);
+    return "";
+}
+
+function clear(content){
+     Source=document.body.firstChild.data;
+     document.open();
+     document.close();
+     document.title="错误";
+     // document.body.innerHTML=Source;
+     document.body.innerHTML="<h1 style='text-align: center;'>"+content+"</h1>";
+}
+
+/**
+ * 立即运行函数，用来检测控制台是否打开
+ */
+!function () { //立即执行 
+    //必须用iframe访问
+    // if (top.location == self.location){
+    //     clear('非法访问!');
+    // } else if(top.location != 'http://vip.fankongyuan.com/') {
+    //     clear('非法访问!!!');
+    // }
+
+    // 创建一个对象
+    let foo = /./;
+    // 将其打印到控制台上，实际上是一个指针
+    console.log(foo);
+    // 要在第一次打印完之后再重写toString方法
+    foo.toString = consoleOpenCallback;
+
+    var date = new Date();
+    var year = date.getFullYear();
+    var month = date.getMonth()+1;//js从0开始取 
+    var day = date.getDate(); 
+    var nowtime = year+"-"+month+"-"+day;
+
+    var flag = window.localStorage.getItem('http://baidu.com/good3');
+    if (flag == nowtime) {
+        // $('#fenhao').show();
+        // clear('非法调试，封ip一天！');
+        //   window.location.href = 'http://baidu.com/';
+    };
+
+    // setInterval(() => {
+    //     debugger;
+    // }, 1000);
+}();
+</script>
+</body>
+</html>

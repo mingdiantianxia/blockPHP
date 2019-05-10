@@ -13,5 +13,9 @@ date_default_timezone_set('PRC');
 loadc('db',loadc('config')->get("db", "config"));
 loadc('loader')->run();
 
-echo "接收到{$argc}个参数";
-print_r($argv);
+$cmd_config = loadc('config')->get("cmd_path", "config");
+$result = loadf('cliRun', $cmd_config['path'], $cmd_config['namespace']);
+if ($result['code'] == -1) {
+	//搜集没有返回true的任务日志
+	loadc('log')->info('crond_error:'.$result['msg'], $argv);
+}

@@ -25,4 +25,11 @@ return [
             //持久化链接
             'persistent' => true,
     ],
+
+    'cmd_path' => [
+            //命令文件夹
+            'path'  => '',
+            //对应的命名空间
+            'namespace'  => '',
+    ],
 ];

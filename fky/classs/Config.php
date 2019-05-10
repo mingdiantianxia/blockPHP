@@ -95,7 +95,7 @@ class Config
 
         if (!empty($appConfig)) {
             //应用配置覆盖默认配置
-            $this->_configCache[$type] = $this->_mergeArray($this->_configCache[$type], $appConfig, false);
+            $this->_configCache[$type] = $this->_mergeArray($this->_configCache[$type], $appConfig);
         }
     }
 

@@ -1,9 +1,10 @@
 <?php
 namespace controllers\test2;
+use controllers\BaseController;
 /**
 * \HomeController
 */
-class Test2Controller extends \controllers\BaseController
+class Test2Controller extends BaseController
 {
   
   public function test()

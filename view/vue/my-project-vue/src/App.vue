@@ -1,6 +1,10 @@
 <script src="store.js"></script>
 <template>
-  <div id="app">
+  <div id="app2">
+  <header>
+    <!-- router-link 定义点击后导航到哪个路径下 -->
+    <router-link to="/home">Home</router-link>
+  </header>
   <h1 v-text='title'></h1>
   <input type="text" name="" id="" v-model="newItem" v-on:keyup.enter="addNew" lazy number>
   <div>{{dosomething}}</div>
@@ -12,6 +16,9 @@
   <msg v-bind:params="newItem"></msg>
   
   <child v-bind:message="newItem"></child>
+
+   <!-- 对应的组件内容渲染到router-view中 -->
+  <router-view></router-view>   
   </div>
 </template>
 
@@ -66,7 +73,7 @@ export default {
 .finished{
   text-decoration: underline;
 }
-#app {
+#app2 {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
