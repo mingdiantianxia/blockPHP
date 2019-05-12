@@ -83,10 +83,11 @@ trait BaseTool {
      * 获取post和get的参数
      * @author fukaiyao
      * @param $param      要获取的参数名
+     * @param $default    单项默认值
      * @param $filter     是否xss过滤
      * @return int|string|array|bool
      */
-    public function GPC($param = '', $filter = true){
+    public function GPC($param = '', $default = '', $filter = true){
         $_GPC = false;
         if (empty($param)) {
             $_GPC = $_GET;
@@ -96,11 +97,16 @@ trait BaseTool {
                 }
             }
         }
-        elseif (isset($_GET[$param])) {
-            $_GPC = $_GET[$param];
+        elseif (isset($_GET[$param]) || isset($_POST[$param])) {
+            if (isset($_GET[$param])) {
+                $_GPC = $_GET[$param];
+            }
+            if (isset($_POST[$param])) {
+                $_GPC = $_POST[$param];
+            }
         }
-        elseif (isset($_POST[$param])) {
-            $_GPC = $_POST[$param];
+        else {
+           return $default;
         }
 
         if ($filter) {

@@ -1,10 +1,11 @@
 <?php
 namespace controllers\vip;
 use fky\traits\BaseTool;
+use controllers\BaseController;
 /**
 * \VedioVipController
 */
-class VedioVipController extends \controllers\BaseController
+class VedioVipController extends BaseController
 {
 	use BaseTool;
   
