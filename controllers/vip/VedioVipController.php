@@ -10,7 +10,7 @@ class VedioVipController extends \controllers\BaseController
   
   public function Vip()
   {
-	   @session_start();
+     @session_start();
      $token = uniqid();
      $_SESSION['Myvip_token'] = ['expiration'=>1,'token'=>$token,'time'=>time()];
      echo loadc('template')->make('vip/vip_start', ['token' => $token])->render();

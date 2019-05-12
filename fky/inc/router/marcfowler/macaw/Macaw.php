@@ -18,7 +18,7 @@ class Macaw {
   public static $method;
   public static $prefix = '';
   public static $patterns = array(
-      ':any' => '[^/]+',
+      ':any' => '(/\S*)*',
       ':num' => '[0-9]+',
       ':all' => '.*'
   );
@@ -137,6 +137,16 @@ class Macaw {
             // Remove $matched[0] as [1] is the first parameter.
             array_shift($matched);
 
+            //带:any路由名才能传参，整理参数
+            if (count($matched) == 1) {
+                if ($matched[0] != '/') {
+                    $matched = explode('/',$matched[0]);
+                    array_shift($matched);//弹出第一个空参数
+                } else {
+                    unset($matched[0]);
+                }
+            }
+
             if (!is_object(self::$callbacks[$pos])) {
 
               // Grab all parts based on a / separator
@@ -175,7 +185,7 @@ class Macaw {
       if (!self::$error_callback) {
         self::$error_callback = function() {
           header($_SERVER['SERVER_PROTOCOL']." 404 Not Found");
-          echo '404';
+          echo '404: ' . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) . ' Not Found！';
         };
       } else {
         if (is_string(self::$error_callback)) {
