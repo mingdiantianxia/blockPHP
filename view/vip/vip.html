@@ -91,6 +91,7 @@
                      <option value="5">爱奇艺搜索</option>
                      <option value="6">百度搜索</option>
                      <option value="7">网盘搜索</option>
+                     <option value="8">头条搜索</option>
                     </select>
             </span>
 
@@ -198,6 +199,8 @@ $(function(){
                 { url: "https://www.myxin.top/jx/api/?url=", title: "综合线路" },
                 { url: "http://jx.ovov.cc/?url=", title: "综合线路" },
                 { url: "http://jx.618ge.com/?url=", title: "综合线路" },
+
+                { url: "http://j.zz22x.com/jx/?url=", title: "综合线路" },
             ],
             search_type:1,
             search_url:{
@@ -207,7 +210,8 @@ $(function(){
                 4:'https://so.youku.com/search_video/q_',
                 5:'http://so.iqiyi.com/so/q_',
                 6:'https://www.baidu.com/s?wd=',
-                7:'http://www.pansoso.com/zh/'
+                7:'http://www.pansoso.com/zh/',
+                8:'https://www.toutiao.com/search/?keyword='
             },
             video_list:[],
         },
@@ -219,12 +223,12 @@ $(function(){
                 if (this_el.data("type") == 'zhibo') {
                     $('#sh').hide();
                     $('.check-url').hide();
-                     // $('#kj').show();
+                     $('#kj').show();
                      xldata();
                 } else {
                     if (!this.url) {
                         $('#sh').hide();
-                         // $('#kj').show();
+                         $('#kj').show();
                         $('.check-url').show();
                         event.preventDefault();//阻止默认事件
                         setTimeout(function () {
@@ -236,12 +240,12 @@ $(function(){
                         $('#sh').hide();
                         $('.check-url').hide();
                         window.localStorage.setItem('temp_url', this.url);
-                         // $('#kj').show();
+                         $('#kj').show();
                          xldata();
 
                         // var video_list_data = JSON.parse(window.sessionStorage.getItem('video_list') || '[]');
                         // if (video_list_data) {
-          //                this.video_list = video_list_data.data;
+                        //  this.video_list = video_list_data.data;
                         // };
                         $.ajax({
                             url: "<?php echo loadf('getHost'); ?>videolist?url="+this.url,
@@ -251,7 +255,7 @@ $(function(){
                             success: function (data) {
                                 if (data) {
                                     app.video_list = data.data;
-                                    window.sessionStorage.setItem('video_list', JSON.stringify(data));
+                                    // window.sessionStorage.setItem('video_list', JSON.stringify(data));
                                 }
                             }
                         })
@@ -267,7 +271,7 @@ $(function(){
                     //
                     $('#sh').append('<iframe src="'+this.search_url[this.search_type]+this.url+'" data-iframe="my" width="100%" height="100%" scrolling="yes" frameborder="0" marginwidth="0" marginheight="0" border="0" style="width: 100vw;height:  200vh; position:absolute;"></iframe>');
                     $("iframe[name='showframe']").attr("src", '');
-                     // $('#kj').hide();
+                     $('#kj').hide();
                     checkUrl();
                 }
             },
@@ -304,26 +308,26 @@ $(function(){
     //禁止F12
     window.onkeydown = window.onkeyup = window.onkeypress = function (event) {
        // 判断是否按下F12，F12键码为123
-       // if (event.keyCode === 123) {
-       //    event.preventDefault(); // 阻止默认事件行为
-       //    window.event.returnValue = false;
-       // }
-       // if (event.shiftKey && event.ctrlKey && event.keyCode === 73) {
-       //     event.preventDefault(); // 阻止默认事件行为
-       //    window.event.returnValue = false;
-       // }
+       if (event.keyCode === 123) {
+          event.preventDefault(); // 阻止默认事件行为
+          window.event.returnValue = false;
+       }
+       if (event.shiftKey && event.ctrlKey && event.keyCode === 73) {
+           event.preventDefault(); // 阻止默认事件行为
+          window.event.returnValue = false;
+       }
        if (event.keyCode === 13) {
            app.mysearch();
        }
-       // if (event.ctrlKey && event.keyCode === 83 ) {
-       //     event.preventDefault(); // 阻止默认事件行为
-       //    window.event.returnValue = false;
-       // }
-       // //屏蔽Shift+F10
-       // if((e.shiftKey) && (e.keyCode === 121)){
-       //     event.preventDefault(); // 阻止默认事件行为
-       //    window.event.returnValue = false;
-       // }
+       if (event.ctrlKey && event.keyCode === 83 ) {
+           event.preventDefault(); // 阻止默认事件行为
+          window.event.returnValue = false;
+       }
+       //屏蔽Shift+F10
+       if((e.shiftKey) && (e.keyCode === 121)){
+           event.preventDefault(); // 阻止默认事件行为
+          window.event.returnValue = false;
+       }
     }
 
     $("[data-toggle='tooltip']").tooltip(); 
@@ -347,11 +351,11 @@ setInterval(function() {
 }, 1000);
 
 //禁止右键
-// function Click(){
-//     //alert('版权所有(C)2018 繁空园');
-//     window.event.returnValue=false;
-// }
-// document.oncontextmenu=Click;
+function Click(){
+    //alert('版权所有(C)2018 繁空园');
+    window.event.returnValue=false;
+}
+document.oncontextmenu=Click;
 
 /**
  * 控制台打开的时候回调方法
@@ -364,13 +368,13 @@ function consoleOpenCallback(){
      
     var flag = year+"-"+month+"-"+day;
     window.localStorage.setItem('http://baidu.com/good3', flag);
-    // $('#fenhao').show();
-    // setTimeout(function(){
-    //     clear('非法调试，封ip一天！');
-    // },1000);
-    // setInterval(function(){
-    //         window.location.href = 'http://baidu.com/';
-    // }, 1000);
+    $('#fenhao').show();
+    setTimeout(function(){
+        clear('非法调试，封ip一天！');
+    },1000);
+    setInterval(function(){
+            window.location.href = 'http://baidu.com/';
+    }, 1000);
     return "";
 }
 
@@ -388,9 +392,10 @@ function clear(content){
  */
 !function () { //立即执行 
     //必须用iframe访问
-    // if (top.location == self.location){
-    //     clear('非法访问!');
-    // } else if(top.location != 'http://vip.fankongyuan.com/') {
+    if (top.location == self.location){
+        clear('非法访问!');
+    }
+    // else if(top.location != 'http://vip.fankongyuan.com/') {
     //     clear('非法访问!!!');
     // }
 
@@ -409,9 +414,9 @@ function clear(content){
 
     var flag = window.localStorage.getItem('http://baidu.com/good3');
     if (flag == nowtime) {
-        // $('#fenhao').show();
-        // clear('非法调试，封ip一天！');
-        //   window.location.href = 'http://baidu.com/';
+        $('#fenhao').show();
+        clear('非法调试，封ip一天！');
+          window.location.href = 'http://baidu.com/';
     };
 
     // setInterval(() => {

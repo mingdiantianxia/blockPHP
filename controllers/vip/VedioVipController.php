@@ -238,7 +238,7 @@ public function myHttpClient($url, array $options = array()) {
 //        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query(参数数组));
     curl_setopt($curl, CURLINFO_HEADER_OUT, true);
     curl_setopt($curl, CURLOPT_HEADER, true);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);//不直接输出
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false); //不验证证书
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false); //不验证证书
     $UserAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36';

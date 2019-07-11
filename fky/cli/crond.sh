@@ -1,7 +1,7 @@
 #!/bin/bash
-pidPath="../runtime/crond.pid"
+pidPath="../../runtime/crond.pid"
 phpbin="/usr/local/php/bin/php"
-logFile="../runtime/crond.log"
+logFile="../../runtime/crond.log"
 
 #cd /data/wwwroot/free_mvc/fky/cli/
 cd ../

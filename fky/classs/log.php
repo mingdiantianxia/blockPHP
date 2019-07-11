@@ -42,11 +42,11 @@ class Log
 		array_unshift($this->_handlers, $stream_handler);//加入handler 日志管理器数组，配置管理器
 		
 		array_unshift($this->_processors, new WebProcessor);//请求来源的信息
-		array_unshift($this->_processors, new IntrospectionProcessor);//当前打印日志的文件信息
+//		array_unshift($this->_processors, new IntrospectionProcessor);//当前打印日志的文件信息
 		//在日的后面加上了uid和process_id
 		// array_unshift($this->_processors, new ProcessIdProcessor);
 		array_unshift($this->_processors, new UidProcessor(16));//加入processors 日志管理器数组，配置管理器
-		// array_unshift($this->_processors, new PsrLogMessageProcessor);//PSR-3规则处理信息
+//        array_unshift($this->_processors, new PsrLogMessageProcessor);//PSR-3规则处理信息
 
 		if (null === $this->_logger) {
             $this->_logger = new Logger($name, $this->_handlers, $this->_processors);
@@ -163,7 +163,7 @@ class Log
      *
      * @return array Assoc array with human-readable level names => level codes.
      */
-    public static function getLevels()
+    public function getLevels()
     {
         return $this->_logger->getLevels();
     }
@@ -174,7 +174,7 @@ class Log
      * @param  int    $level
      * @return string
      */
-    public static function getLevelName($level)
+    public function getLevelName($level)
     {
         return $this->_logger->getLevelName($level);
     }
@@ -233,9 +233,9 @@ class Log
 
             $newCategory = $callContext['class'];
             $newCategory .= '::' . $callContext['function'];
-//            if (isset($callContext['line'])) {
-//                $newCategory .= '-' . $callContext['line'];
-//            }
+            if (isset($callContext['line'])) {
+                $newCategory .= '-' . $callContext['line'];
+            }
             $msg .= "class={$newCategory}";
             
             //附加函数参数

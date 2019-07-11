@@ -78,13 +78,17 @@ class Crond
         //开始任务
         $currentTime = time();
         if (isset($this->_conf['jobs']) && !empty($this->_conf['jobs'])) {
+            //轮询执行定时任务
             foreach ($this->_conf['jobs'] as $jobId => $job) {
                 if (!isset($job['title']) || !isset($job['cron']) || !isset($job['command']) || !isset($job['id'])) {
                     $this->_log("crontab job config error");
                     continue;
                 }
 
+                //当前时间在可执行时间范围
                 if ($this->_isTimeByCron($currentTime, $job['cron'])) {
+
+                    //最新的定时任务还未退出，阻塞不执行
                     if (isset($this->_runningTasks[$job['id']])) {
                         $this->_log("last cron worker not exit. job id={$job['id']}");
                         continue;  
@@ -100,7 +104,7 @@ class Crond
                         $this->_log("start cron worker failure.");
                         continue;
                     }
-                    $this->_runningTasks[$job['id']] = $pid;
+                    $this->_runningTasks[$job['id']] = $pid;//记录该定时任务的子进程id
                     $cronWorker->write(json_encode($job));
                 }
             }
@@ -112,6 +116,16 @@ class Crond
      */
     public function doCronTask($worker, $job)
     {
+        //设置用户组
+        $userName = $this->_conf['user'];
+        $userInfo = posix_getpwnam($userName);
+        if (empty($userName)) {
+            $this->_log("start crontab failure, get userinfo failure. user={$userName}");
+            return;
+        }
+        posix_setuid($userInfo['uid']);
+        posix_setgid($userInfo['gid']);
+
         //clear log
         //这里写清空日志代码
 
@@ -127,9 +141,9 @@ class Crond
      * @param int $sig  - 信号类型
      */
     public function doSignal($sig) {
-        $pidToJobId = array_flip($this->_runningTasks);
+        $pidToJobId = array_flip($this->_runningTasks);//反转键和值
         switch ($sig) {
-            case SIGCHLD:
+            case SIGCHLD: //子进程退出
                 //必须为false，非阻塞模式
                 while($ret =  Process::wait(false)) {
 //                    echo "recycle child process PID={$ret['pid']}\n";
@@ -146,7 +160,7 @@ class Crond
                 }
 
                 break;
-            case SIGTERM:
+            case SIGTERM: //终止信号，子进程全都退出
                 $this->_log("recv terminate signal, exit crond.");
                 $this->_flgExit = true;
                 break;

@@ -1,6 +1,7 @@
 #!/usr/local/php/bin/php
 <?php
 namespace fky\cli;
+/*使用linux的crontab配置定时任务*/
 
 // fix for fcgi
 defined('STDIN') or define('STDIN', fopen('php://stdin', 'r'));
@@ -14,11 +15,11 @@ loadc('db',loadc('config')->get("db", "config"));
 loadc('loader')->run();
 //初始化配置参数
 //php命令
-$phpPath = loadc('config')->get("php", "worker");
+$phpPath = loadc('config')->get("php", "cron");
 //项目目录
 $projectPath = FKY_PROJECT_PATH;
 //进程运行角色
-$uid = loadc('config')->get("user", "worker");
+$uid = loadc('config')->get("user", "cron");
 
 //定制任务配置
 //# Example of job definition:
@@ -29,10 +30,10 @@ $uid = loadc('config')->get("user", "worker");
 //# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
 //# |  |  |  |  |
 //# *  *  *  *  * user-name  command to be executed
-//*/1 * * * * {$uid} {$phpPath} {$projectPath}/scripts/yiic statis push  &>> {$projectPath}/runtime/statis_push.log
+//*/1 * * * * {$uid} {$phpPath} {$projectPath}/fky/cli/fkycmd statis push  &>> {$projectPath}/runtime/statis_push.log
 $crontab =<<< EOT
-#每分钟上报监控数据
-*/1 * * * * {$uid} {$phpPath} ./fkycmd statis push  &>> {$projectPath}/runtime/statis_push.log
+#每分钟执行一次测试任务
+*/1 * * * * {$uid} {$phpPath} ./fkycmd test testcrontab  &>> {$projectPath}/runtime/test.log
 EOT;
 
 //安装定时任务
