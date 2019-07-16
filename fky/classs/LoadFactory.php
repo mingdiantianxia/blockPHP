@@ -75,7 +75,7 @@
                  die(' function ' . $name . ' Not Found!');
              }
              require_once $func;
-             $function = self::$baseNamespace . DIRECTORY_SEPARATOR . self::$FuncDir . DIRECTORY_SEPARATOR . $name;
+             $function = self::$baseNamespace . '\\' . self::$FuncDir . '\\' . $name;
 
              if ($call_exist === 0) {
                  return $function;
@@ -95,16 +95,18 @@
          if ($name == '') {
              die('class name is empty!');
          }
+
+         $name = strtolower($name);
          if (isset(self::$modules[$name])) {
              return self::$modules[$name];
          }
-         $class = self::$baseDir . DIRECTORY_SEPARATOR . self::$ClassDir . DIRECTORY_SEPARATOR . strtolower($name) . '.php';
+         $class = self::$baseDir . DIRECTORY_SEPARATOR . self::$ClassDir . DIRECTORY_SEPARATOR . $name . '.php';
 
          if (!is_file($class)) {
              die(' class ' . $name . ' Not Found!');
          }
          require_once $class;
-         $class_name = self::$baseNamespace . DIRECTORY_SEPARATOR . self::$ClassDir . DIRECTORY_SEPARATOR . ucfirst($name);
+         $class_name = self::$baseNamespace . '\\' . self::$ClassDir . '\\' . ucfirst($name);
 
          $class_name = new \ReflectionClass($class_name);//反射类
          self::$modules[$name] = $class_name->newInstanceArgs($arguments);//传入参数
@@ -127,7 +129,7 @@
              die(' function ' . $name . ' Not Found!');
          }
          require_once $func;
-         $function = self::$baseNamespace . DIRECTORY_SEPARATOR . self::$FuncDir . DIRECTORY_SEPARATOR . $name;
+         $function = self::$baseNamespace . '\\' . self::$FuncDir . '\\' . $name;
 
          if (count($arguments) > 0) {
              return call_user_func_array($function, $arguments);//调用函数，并传递参数
@@ -146,17 +148,19 @@
       * @return [type]            [description]
       */
      public static function __callStatic($name, $arguments)
-     {//调用的类名，参数数组
+     {
+         //调用的类名，参数数组
+         $name = strtolower($name);
          if (isset(self::$modules[$name])) {
              return self::$modules[$name];
          }
-         $class = self::$baseDir . DIRECTORY_SEPARATOR . self::$ClassDir . DIRECTORY_SEPARATOR . strtolower($name) . '.php';
+         $class = self::$baseDir . DIRECTORY_SEPARATOR . self::$ClassDir . DIRECTORY_SEPARATOR . $name . '.php';
 
          if (!is_file($class)) {
              die(' class ' . $name . ' Not Found!');
          }
          require_once $class;
-         $class_name = self::$baseNamespace . DIRECTORY_SEPARATOR . self::$ClassDir . DIRECTORY_SEPARATOR . ucfirst($name);
+         $class_name = self::$baseNamespace . '\\' . self::$ClassDir . '\\' . ucfirst($name);
 
          $class_name = new \ReflectionClass($class_name);//反射类
          self::$modules[$name] = $class_name->newInstanceArgs($arguments);//传入参数

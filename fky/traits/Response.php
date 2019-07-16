@@ -17,7 +17,7 @@ trait Response{
 	 */
 	public function showResponse($code,$message='',$data=array(),$type="json"){
 		if (!is_numeric($code)) {
-				return;
+		    return;
 		}
 
 		$type=isset($_GET['format'])?$_GET['format']:$type;
@@ -28,13 +28,13 @@ trait Response{
 			);
 		if ($type=='json') {
 			$this->json($code,$message,$data);
-			exit;
+			return;
 		}elseif ($type=='arr') {
-			var_dump($result);
-			exit;
+             var_export($result);
+             return;
 		}elseif ($type=='xml') {
             $this->xmlEncode($code,$message,$data);
-			exit;
+            return;
 		}else{
 			//其他方法
 		}
@@ -60,8 +60,6 @@ trait Response{
 	 		);
          @header("Content-Type: text/json; charset=UTF-8");
          echo urldecode(json_encode($this->returnParams($result)));
-	 	exit;
-
 	 }
 
 	/**

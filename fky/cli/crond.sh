@@ -1,9 +1,9 @@
 #!/bin/bash
-pidPath="../../runtime/crond.pid"
+pidPath="../../data/log/crond.pid"
 phpbin="/usr/local/php/bin/php"
-logFile="../../runtime/crond.log"
+logFile="../../data/log/crond.log"
 
-#cd /data/wwwroot/free_mvc/fky/cli/
+#cd /data/wwwroot/www/free_mvc/fky/cli/
 cd ../
 cd cli
 #crond server

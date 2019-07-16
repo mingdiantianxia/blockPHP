@@ -117,5 +117,59 @@ trait BaseTool {
 
     }
 
+    /**
+     * 获取post参数
+     * @author fukaiyao
+     * @param $param      要获取的参数名
+     * @param $default    单项默认值
+     * @param $filter     是否xss过滤
+     * @return int|string|array|bool
+     */
+    public function getPost($param = '', $default = '', $filter = true){
+        $temp = false;
+        if (empty($param)) {
+            $temp = $_POST;
+        }
+        elseif (isset($_POST[$param])) {
+            $temp = $_POST[$param];
+        }
+        else {
+            return $default;
+        }
 
+        if ($filter) {
+            return $this->XssFilter($temp);
+        } else {
+            return $temp;
+        }
+
+    }
+
+    /**
+     * 获取get参数
+     * @author fukaiyao
+     * @param $param      要获取的参数名
+     * @param $default    单项默认值
+     * @param $filter     是否xss过滤
+     * @return int|string|array|bool
+     */
+    public function getQuery($param = '', $default = '', $filter = true){
+        $temp = false;
+        if (empty($param)) {
+            $temp = $_GET;
+        }
+        elseif (isset($_POST[$param])) {
+            $temp = $_GET[$param];
+        }
+        else {
+            return $default;
+        }
+
+        if ($filter) {
+            return $this->XssFilter($temp);
+        } else {
+            return $temp;
+        }
+
+    }
 }

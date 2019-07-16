@@ -22,7 +22,7 @@
                 die(' function ' . $name . ' Not Found!');
             }
             require_once $func;
-            $function = 'fky'.DIRECTORY_SEPARATOR.'func'.DIRECTORY_SEPARATOR.$name;
+            $function = 'fky\\func\\'.$name;
 
             if ($call_exist === 0) {
                 return $function;
@@ -40,6 +40,8 @@
         if ($name == '') {
             die('class name is empty!');
         }
+
+        $name = strtolower($name);
         static $fky_modules = array();
         if (isset($fky_modules[$name])) {
             return $fky_modules[$name];
@@ -50,7 +52,7 @@
             die(' class ' . $name . ' Not Found!');
         }
         require_once $class;
-        $class_name = 'fky'.DIRECTORY_SEPARATOR.'classs'.DIRECTORY_SEPARATOR.$name;
+        $class_name = 'fky\\classs\\' . ucfirst($name);
 
         $class_name = new \ReflectionClass($class_name);//反射类
         $fky_modules[$name] = $class_name->newInstanceArgs($arguments);//传入参数

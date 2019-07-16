@@ -220,10 +220,10 @@ public function GetVideoList()
 
     }
     else {
-        return false;
+        return $this->showResponse(-1, '暂时不支持该网站集数解析！');
     }
 
-    die(json_encode(array('data' => $vedio_list)));
+     return $this->showResponse(200, '', $vedio_list);
   }
 
 public function myHttpClient($url, array $options = array()) {

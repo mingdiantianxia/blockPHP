@@ -5,12 +5,12 @@ return [
             'database_name' => 'test',
             'server' => 'localhost',
             'username' => 'root',
-            'password' => '',
+            'password' => '123456',
             'charset' => 'utf8',
              // 可选参数
             'port' => 3306,
             // 可选，定义表的前缀
-            // 'prefix' => 'wx_',
+             'prefix' => 'wx_',
         ],
         
     'redis' => [
@@ -28,8 +28,8 @@ return [
 
     'cmd_path' => [
             //命令文件夹
-            'path'  => '',
+            'path'  => __DIR__ . '/../'.'controllers/test2/',
             //对应的命名空间
-            'namespace'  => '',
+            'namespace'  => 'controllers\test2',
     ],
 ];

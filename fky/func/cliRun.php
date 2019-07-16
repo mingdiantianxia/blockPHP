@@ -8,7 +8,7 @@ namespace fky\func;
  * @param  [type] $namespace [命令目录对应的命名空间]
  * @return [type]            []
  */
-function cliRun($argArr, $path, $namespace=DIRECTORY_SEPARATOR) {
+function cliRun($argArr, $path, $namespace='\\') {
 	$return_arr = array(
 				'code'=> -1,
 				'msg'=> 'false',
@@ -34,7 +34,7 @@ function cliRun($argArr, $path, $namespace=DIRECTORY_SEPARATOR) {
 	} 
 	else {
 		//加载类文件
-	    $class_file =  $path . $class_name . '.php';
+	    $class_file =  $path . $class_name . 'Controller.php';
 	    if (!is_file($class_file)) {
 	        $return_arr['msg'] = ' class ' . $class_name . ' Not Found!';
 			return $return_arr;
@@ -42,17 +42,17 @@ function cliRun($argArr, $path, $namespace=DIRECTORY_SEPARATOR) {
 	    require_once $class_file;
 	    
 	    //检测命名空间
-	    if ($namespace != DIRECTORY_SEPARATOR) {
+	    if ($namespace != '\\') {
 	    	$namespace = trim($namespace,"\\");
 		    if ($namespace != '') {
-		    	$namespace = DIRECTORY_SEPARATOR.$namespace.DIRECTORY_SEPARATOR;
+		    	$namespace = '\\'.$namespace.'\\';
 		    } else {
-		    	$namespace = DIRECTORY_SEPARATOR;
+		    	$namespace = '\\';
 		    }
 	    }
 	    
 	    //带命名空间的类名
-	    $class_name = $namespace . $class_name;
+	    $class_name = $namespace . $class_name . 'Controller';
 	    $instance = new $class_name;
 	    $return_arr['code'] = 200;
 	    if ($result = @call_user_func_array ([$instance, $func_name], $arguments)) { //调用函数，并传递参数

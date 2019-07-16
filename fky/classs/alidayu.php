@@ -5,4 +5,3 @@ class Alidayu extends \TopClient{
 	
 }
 
- ?>

@@ -253,7 +253,7 @@ $(function(){
                             data: {},
                             dataType: "json",
                             success: function (data) {
-                                if (data) {
+                                if (data.code == 200) {
                                     app.video_list = data.data;
                                     // window.sessionStorage.setItem('video_list', JSON.stringify(data));
                                 }

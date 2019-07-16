@@ -5,4 +5,3 @@ class Alipay extends \AopClient{
 	
 }
 
- ?>

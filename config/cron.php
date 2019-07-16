@@ -3,11 +3,11 @@
  * 定时任务
  */
 return [
-    "pid" => FKY_PROJECT_PATH .'/runtime/crond.pid',
+    "pid" => FKY_PROJECT_PATH .'/data/log/crond.pid',
     //php命令路径
-    "php" => "",
+    "php" => "/usr/local/php/bin/php",
     //进程运行角色
-    "user"   => 'www',
+    "user"   => 'root',
     //定时任务
     'jobs' => [
 //        [
@@ -19,10 +19,10 @@ return [
 //        ],
 
         [
-            'id' => 'cron_push_benchmark',
-            'title' => '每分钟上报一次性能监控数据',
-            'cron' => '0 */1 * * * *',
-            'command' => 'statis push',
+            'id' => 'cron_test2_test',
+            'title' => '每秒钟执行一次测试任务',
+            'cron' => '*/1 * * * * *',
+            'command' => 'test2 test',
         ],
 
 

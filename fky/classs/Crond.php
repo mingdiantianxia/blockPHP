@@ -130,7 +130,7 @@ class Crond
         //这里写清空日志代码
 
         $this->_log("cron worker running task={$job['title']}, jobId={$job['id']}");
-        $command = dirname(__FILE__) . '../cli/fkycmd';
+        $command = dirname(__FILE__) . '/../cli/fkycmd';
          set_time_limit(0);
          $cmdArgs = explode(' ',  $job['command']);
          $worker->exec($command,  $cmdArgs);

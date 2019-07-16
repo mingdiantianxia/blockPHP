@@ -4,10 +4,10 @@ namespace fky\cli;
 // fix for fcgi
 defined('STDIN') or define('STDIN', fopen('php://stdin', 'r'));
 
-require_once '..'.DIRECTORY_SEPARATOR.'FkyLoad.php';
-
 //定义项目根目录
 define('FKY_PROJECT_PATH',  __DIR__ .DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR);
+
+require_once FKY_PROJECT_PATH.'fky/FkyLoad.php';
 
 date_default_timezone_set('PRC');
 loadc('db',loadc('config')->get("db", "config"));

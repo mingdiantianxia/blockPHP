@@ -30,10 +30,10 @@ $uid = loadc('config')->get("user", "cron");
 //# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
 //# |  |  |  |  |
 //# *  *  *  *  * user-name  command to be executed
-//*/1 * * * * {$uid} {$phpPath} {$projectPath}/fky/cli/fkycmd statis push  &>> {$projectPath}/runtime/statis_push.log
+//*/1 * * * * {$uid} {$phpPath} {$projectPath}/fky/cli/fkycmd statis push  &>> {$projectPath}runtime/statis_push.log
 $crontab =<<< EOT
 #每分钟执行一次测试任务
-*/1 * * * * {$uid} {$phpPath} ./fkycmd test testcrontab  &>> {$projectPath}/runtime/test.log
+*/1 * * * * {$uid} {$phpPath} {$projectPath}fky/cli/fkycmd test2 test  &>> {$projectPath}data/log/fky.log
 EOT;
 
 //安装定时任务
