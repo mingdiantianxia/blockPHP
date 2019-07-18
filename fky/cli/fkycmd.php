@@ -14,10 +14,14 @@ loadc('db',loadc('config')->get("db", "config"));
 loadc('loader')->run();
 
 $cmd_config = loadc('config')->get("cmd_path", "config");
-$result = loadf('cliRun', [$argc, $argv], $cmd_config['path'], $cmd_config['namespace']);
-if ($result['code'] == -1) {
+$result = loadf('cliRun', $cmd_config['path'], $cmd_config['namespace']);
+if (!isset($result['code']) || $result['code'] == -1) {
 	//搜集没有返回true的任务日志
-	loadc('log')->info('crond_error:'.$result['msg'], $argv);
+    if (isset($result['msg'])) {
+        loadc('log')->info('cmd_error:'.$result['msg'], $argv);
+    } else {
+        loadc('log')->info('cmd_error:'.$result, $argv);
+    }
 	return false;
 } else {
     return true;

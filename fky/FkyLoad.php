@@ -22,7 +22,7 @@
                 die(' function ' . $name . ' Not Found!');
             }
             require_once $func;
-            $function = 'fky\\func\\'.$name;
+            $function = "fky\\func\\".$name;
 
             if ($call_exist === 0) {
                 return $function;
@@ -52,7 +52,7 @@
             die(' class ' . $name . ' Not Found!');
         }
         require_once $class;
-        $class_name = 'fky\\classs\\' . ucfirst($name);
+        $class_name = "fky\\classs\\" . ucfirst($name);
 
         $class_name = new \ReflectionClass($class_name);//反射类
         $fky_modules[$name] = $class_name->newInstanceArgs($arguments);//传入参数

@@ -128,6 +128,9 @@ class Crond
 
         //clear log
         //这里写清空日志代码
+        if (is_file($this->_conf['log'])) {
+            file_put_contents($this->_conf['log'], '');
+        }
 
         $this->_log("cron worker running task={$job['title']}, jobId={$job['id']}");
         $command = dirname(__FILE__) . '/../cli/fkycmd';
