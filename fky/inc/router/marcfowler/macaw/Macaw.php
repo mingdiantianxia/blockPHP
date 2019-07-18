@@ -28,8 +28,13 @@ class Macaw {
    * Defines a route w/ callback and method
    */
   public static function __callstatic($method, $params) {
+      $filename = dirname($_SERVER['PHP_SELF']);#当前正在执行脚本的文件名
+      if ($filename == '/') {
+          $filename = '';
+      }
     $uri = implode('/', array_filter(array(
-      dirname($_SERVER['PHP_SELF']),
+        $filename,
+//        dirname($_SERVER['PHP_SELF']),
       self::$prefix,
       $params[0],
     )));
