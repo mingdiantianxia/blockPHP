@@ -33,8 +33,8 @@ return [
         ],
         [
             'id' => 'cron_to_test2_test2',
-            'title' => '30分钟活动提醒',
-            'cron' => '0 */30 9-12,13-21, * * *',
+            'title' => '每分钟检测活动提醒',
+            'cron' => '0 */1 9-21, * * 1-6',
             'command' => 'test2 test2',
         ],
     ]
