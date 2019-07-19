@@ -4,6 +4,7 @@
  */
 return [
     "pid" => FKY_PROJECT_PATH .'/data/log/crond.pid',
+    "log" => FKY_PROJECT_PATH .'/data/log/crond.log',
     //php命令路径
     "php" => "/usr/local/php/bin/php",
     //进程运行角色
@@ -20,11 +21,21 @@ return [
 
         [
             'id' => 'cron_test2_test',
-            'title' => '每秒钟执行一次测试任务',
-            'cron' => '*/1 * * * * *',
+            'title' => '饭点提醒吃饭',
+            'cron' => '0 0 11,12,18,19,21 * * *',
             'command' => 'test2 test',
         ],
-
-
+        [
+            'id' => 'cron_to_test2_test',
+            'title' => '饭点提醒吃饭',
+            'cron' => '0 30 9,18 * * *',
+            'command' => 'test2 test',
+        ],
+        [
+            'id' => 'cron_to_test2_test2',
+            'title' => '30分钟活动提醒',
+            'cron' => '0 */30 9-12,13-21, * * *',
+            'command' => 'test2 test2',
+        ],
     ]
 ];
