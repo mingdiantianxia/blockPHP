@@ -32,10 +32,16 @@ $uid = loadc('config')->get("user", "cron");
 //# *  *  *  *  * user-name  command to be executed
 //*/1 * * * * {$uid} {$phpPath} {$projectPath}fky/cli/fkycmd test2 test2  &>> {$projectPath}data/log/crond.log
 //*/1 * * * * root {$projectPath}fky/cli/crond.sh start &>> {$projectPath}data/log/crond.log
-$crontab =<<< EOT
+
+$options = getopt('d');
+if (isset($options['d'])) { //清空定时任务
+    $crontab = '';
+} else {
+$crontab = <<< EOT
 #每分钟尝试启动一次swoole定时任务
 */1 * * * * root {$projectPath}fky/cli/crond.sh start &>> {$projectPath}data/log/crond.log
 EOT;
+}
 
 //安装定时任务
 loadf('installCrontab');
