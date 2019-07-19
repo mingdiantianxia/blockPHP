@@ -28,7 +28,13 @@ function installCrontab()
 
     $cron .= "\n#fky_cron_begin - 由此开始作为定时任务配置\n{$crontab}\n";
     file_put_contents($cronPath, $cron);
-    echo "安装定时任务成功.\n";
-    echo "定时任务为:\n";
-    echo $crontab ."\n";
+
+    if (empty($crontab)) {
+        echo "卸载定时任务成功.\n";
+    } else {
+        echo "安装定时任务成功.\n";
+        echo "定时任务为:\n";
+        echo $crontab ."\n";
+    }
+
 }
