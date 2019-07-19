@@ -8,8 +8,8 @@ define('FKY_PROJECT_PATH',  __DIR__ .DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATO
 
 require_once FKY_PROJECT_PATH.'fky/FkyLoad.php';
 
-date_default_timezone_set('PRC');
-loadc('db',loadc('config')->get("db", "config"));
+//date_default_timezone_set('PRC');
+//loadc('db',loadc('config')->get("db", "config"));
 loadc('loader')->run();
 
 //启动定时任务服务

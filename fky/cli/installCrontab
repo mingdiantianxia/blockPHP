@@ -10,9 +10,9 @@ require_once '..'.DIRECTORY_SEPARATOR.'FkyLoad.php';
 //定义项目根目录
 define('FKY_PROJECT_PATH',  __DIR__ .DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR);
 
-date_default_timezone_set('PRC');
-loadc('db',loadc('config')->get("db", "config"));
-loadc('loader')->run();
+//date_default_timezone_set('PRC');
+//loadc('db',loadc('config')->get("db", "config"));
+//loadc('loader')->run();
 //初始化配置参数
 //php命令
 $phpPath = loadc('config')->get("php", "cron");
@@ -30,10 +30,11 @@ $uid = loadc('config')->get("user", "cron");
 //# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
 //# |  |  |  |  |
 //# *  *  *  *  * user-name  command to be executed
-//*/1 * * * * {$uid} {$phpPath} {$projectPath}/fky/cli/fkycmd statis push  &>> {$projectPath}runtime/statis_push.log
+//*/1 * * * * {$uid} {$phpPath} {$projectPath}fky/cli/fkycmd test2 test2  &>> {$projectPath}data/log/crond.log
+//*/1 * * * * root {$projectPath}fky/cli/crond.sh start &>> {$projectPath}data/log/crond.log
 $crontab =<<< EOT
-#每分钟执行一次测试任务
-*/1 * * * * {$uid} {$phpPath} {$projectPath}fky/cli/fkycmd test2 test  &>> {$projectPath}data/log/fky.log
+#每分钟尝试启动一次swoole定时任务
+*/1 * * * * root {$projectPath}fky/cli/crond.sh start &>> {$projectPath}data/log/crond.log
 EOT;
 
 //安装定时任务
