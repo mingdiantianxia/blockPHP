@@ -28,8 +28,8 @@ return [
 
     'cmd_path' => [
             //命令文件夹
-            'path'  => __DIR__ . '/../'.'controllers/test2/',
+            'path'  => __DIR__ . '/../'.'controllers/console/',
             //对应的命名空间
-            'namespace'  => 'controllers\test2',
+            'namespace'  => 'controllers\console',
     ],
 ];
