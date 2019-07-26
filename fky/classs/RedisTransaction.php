@@ -13,7 +13,7 @@ class RedisTransaction {
 	protected $trueRedis;
 
 	/** @var Redis|null */
-	protected $redisTransactionInstance;
+	protected $redisTransactionInstance = null;
 	protected $redisTransactionLevel = 0;
 
 	protected $isMultiActive;
@@ -29,7 +29,7 @@ class RedisTransaction {
 		}
 
 		$this->redis = $this->initRedisConnection($server);
-		$this->trueRedis = new Storage_RedisTrueResultCaller($this->redis);
+//		$this->trueRedis = new Storage_RedisTrueResultCaller($this->redis);
 	}
 
 	protected function initRedisConnection($server) {
@@ -72,7 +72,8 @@ class RedisTransaction {
 		if(!$this->redisTransactionLevel) {
 			$result = $this->redis->exec();
 			$this->redis = $this->redisTransactionInstance;
-		}
+            $this->redisTransactionInstance = null;
+        }
 		return $result;
 	}
 
@@ -83,7 +84,29 @@ class RedisTransaction {
 		$this->redis->discard();
 		$this->redisTransactionLevel = 0;
 		$this->redis = $this->redisTransactionInstance;
-	}
+        $this->redisTransactionInstance = null;
+    }
+
+    /**
+     * 监听键值(用于事务辅助，必须在begin()方法执行之前执行)
+     * @param string $key
+     * @author fukaiyao 2019-6-5 09:29:35
+     * @return \Redis
+     */
+    public function watch($key)
+    {
+        return $this->redis->watch($key);
+    }
+
+    /**
+     * 取消监听(用于事务辅助，必须在commit()返回false之后执行)
+     * @author fukaiyao 2019-6-5 09:29:35
+     * @return \Redis
+     */
+    public function unwatch()
+    {
+        return $this->redis->unwatch();
+    }
 
 	protected static function replaceFalseToNull($data) {
 		return $data === false ? null : $data;

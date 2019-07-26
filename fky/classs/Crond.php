@@ -54,10 +54,11 @@ class Crond
 
     public function start()
     {
+        //根据 -d 参数确认是否后台运行
         $options = getopt('d');
         $this->_log("start cron server...");
         if (isset($options['d'])) {
-            Process::daemon();
+            Process::daemon();//后台运行
             file_put_contents($this->_conf['pid'], posix_getpid());
         }
 

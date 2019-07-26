@@ -349,7 +349,7 @@ class Phpredis
      */
     public function hGet($key, $field)
     {
-        return json_decode($this->_redis->hGet($key, $field), true);
+        return $this->_redis->hGet($key, $field);
     }
 
     /**
@@ -1215,6 +1215,27 @@ class Phpredis
     public function discard()
     {
         return $this->_redis->discard();
+    }
+
+    /**
+     * 监听键值(用于事务辅助)
+     * @param string $key
+     * @author fukaiyao 2019-6-5 09:29:35
+     * @return \Redis
+     */
+    public function watch($key)
+    {
+        return $this->_redis->watch($key);
+    }
+
+    /**
+     * 取消监听(用于事务辅助)
+     * @author fukaiyao 2019-6-5 09:29:35
+     * @return \Redis
+     */
+    public function unwatch()
+    {
+        return $this->_redis->unwatch();
     }
 
     public function __call($method, $args = array()) {
