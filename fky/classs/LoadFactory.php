@@ -1,4 +1,4 @@
-<?php 
+<?php
  namespace fky\classs;
 
  /**
@@ -12,14 +12,16 @@
      private static $modules = array();
 
      //项目根目录
-     private static $baseDir = __DIR__ .DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR;
+     private static $baseDir = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
 
      //根目录命名空间
-     private static $baseNamespace = 'fky';
+     private static $baseNamespace = '';
 
-     private static $FuncDir = 'func';
+     //根目录下的函数目录
+     private static $FuncDir = 'fky' . DIRECTORY_SEPARATOR . 'func';
 
-     private static $ClassDir = 'classs';
+     //根目录下的类目录
+     private static $ClassDir = 'fky' . DIRECTORY_SEPARATOR . 'classs';
 
      public function __construct() {
 
@@ -69,13 +71,14 @@
                  $callf = explode(':', $name);
                  $name = $callf[1];
              }
-             $func = self::$baseDir . DIRECTORY_SEPARATOR . self::$FuncDir . DIRECTORY_SEPARATOR . strtolower($name) . '.php';
+             $func = self::$baseDir . self::$FuncDir . DIRECTORY_SEPARATOR . strtolower($name) . '.php';
 
              if (!is_file($func)) {
                  die(' function ' . $name . ' Not Found!');
              }
              require_once $func;
              $function = self::$baseNamespace . '\\' . self::$FuncDir . '\\' . $name;
+             $function = strtr($function, DIRECTORY_SEPARATOR, '\\');
 
              if ($call_exist === 0) {
                  return $function;
@@ -100,13 +103,14 @@
          if (isset(self::$modules[$name])) {
              return self::$modules[$name];
          }
-         $class = self::$baseDir . DIRECTORY_SEPARATOR . self::$ClassDir . DIRECTORY_SEPARATOR . $name . '.php';
+         $class = self::$baseDir . self::$ClassDir . DIRECTORY_SEPARATOR . $name . '.php';
 
          if (!is_file($class)) {
              die(' class ' . $name . ' Not Found!');
          }
          require_once $class;
          $class_name = self::$baseNamespace . '\\' . self::$ClassDir . '\\' . ucfirst($name);
+         $class_name = strtr($class_name, DIRECTORY_SEPARATOR, '\\');
 
          $class_name = new \ReflectionClass($class_name);//反射类
          self::$modules[$name] = $class_name->newInstanceArgs($arguments);//传入参数
@@ -115,21 +119,23 @@
 
 
      /**
-      * 当调用了没有的方法时，自动调用这个方法
+      * 当调用了没有的方法时，自动调用这个方法（必须先new）
       * [__call 加载函数]
       * @param  [type] $name      [函数名]
       * @param  [type] $arguments [参数数组]
       * @return [type]            [description]
       */
      public function __call($name, $arguments)
-     {//调用的函数名，参数数组
-         $func = self::$baseDir . DIRECTORY_SEPARATOR . self::$FuncDir . DIRECTORY_SEPARATOR . strtolower($name) . '.php';
+     {
+         //调用的函数名，参数数组
+         $func = self::$baseDir . self::$FuncDir . DIRECTORY_SEPARATOR . strtolower($name) . '.php';
 
          if (!is_file($func)) {
              die(' function ' . $name . ' Not Found!');
          }
          require_once $func;
          $function = self::$baseNamespace . '\\' . self::$FuncDir . '\\' . $name;
+         $function = strtr($function, DIRECTORY_SEPARATOR, '\\');
 
          if (count($arguments) > 0) {
              return call_user_func_array($function, $arguments);//调用函数，并传递参数
@@ -154,13 +160,14 @@
          if (isset(self::$modules[$name])) {
              return self::$modules[$name];
          }
-         $class = self::$baseDir . DIRECTORY_SEPARATOR . self::$ClassDir . DIRECTORY_SEPARATOR . $name . '.php';
+         $class = self::$baseDir . self::$ClassDir . DIRECTORY_SEPARATOR . $name . '.php';
 
          if (!is_file($class)) {
              die(' class ' . $name . ' Not Found!');
          }
          require_once $class;
          $class_name = self::$baseNamespace . '\\' . self::$ClassDir . '\\' . ucfirst($name);
+         $class_name = strtr($class_name, DIRECTORY_SEPARATOR, '\\');
 
          $class_name = new \ReflectionClass($class_name);//反射类
          self::$modules[$name] = $class_name->newInstanceArgs($arguments);//传入参数
