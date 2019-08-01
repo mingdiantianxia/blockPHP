@@ -5,4 +5,4 @@ use EasyWeChat\Foundation\Application;
 class Wechat extends Application{
 	
 }
- ?>
+

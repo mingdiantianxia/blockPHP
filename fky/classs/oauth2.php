@@ -252,4 +252,3 @@ class Oauth2 {
 // $storage->getPublicKey($client_id = null);
 
 // $storage->getEncryptionAlgorithm($client_id = null);
- ?>

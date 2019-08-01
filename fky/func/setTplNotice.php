@@ -76,4 +76,3 @@ function setTplNotice($params = array())
 	return $result;
 
 }
-?>

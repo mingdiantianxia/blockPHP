@@ -19,5 +19,3 @@ function arrayToXml($arr){
     return $xml; 
     }
 }  
-
- ?>

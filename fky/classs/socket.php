@@ -15,5 +15,3 @@ class Socket extends PHPWebSocket{
 		parent::__construct($params['said'],$params['join'],$params['left']);
 	}
 }
-
-?>
