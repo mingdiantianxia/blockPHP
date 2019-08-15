@@ -3,6 +3,7 @@
 namespace controllers\console;
 
 use controllers\BaseController;
+use fky\classs\LoadFactory;
 
 /**
  * 定时任务测试
@@ -22,7 +23,7 @@ class Test2Controller extends BaseController
             return true;
         }
 
-        if ($hour < 9 || ($hour == 9 && $min < 30) || ($hour == 12 && $min > 0) || $hour == 13 || $hour > 21) {
+        if ($hour < 9 || ($hour == 9 && $min < 30) || ($hour == 12 && $min > 0) || $hour == 13 || $hour > 21 || ($hour == 21 && $min > 0)) {
             echo '非工作时间！' . "\n";
             return true;
         }
@@ -96,7 +97,9 @@ class Test2Controller extends BaseController
                 if (in_array($week, [5, 6]) && $min == 30) {
                     $tip2 = '离下班时间还有半个小时，抓紧时间工作哦！';
                 }
-                elseif ($min == 30) {
+                elseif (in_array($week, [5, 6])) {
+                    $tip2 = '今晚不用加班，离下班还有1个小时！';
+                }elseif ($min == 30) {
                     $tip2 = '晚饭时间到！';
                 } else {
                     $tip2 = '离晚饭时间还有半个小时，请继续坚持工作！';
@@ -160,21 +163,8 @@ class Test2Controller extends BaseController
             );
         }
 
-        //机器人二号
-        if ($is_send_text && $hour == 21) {
-            $content['text']['content'] = '下班时间到了';
-            $content['text']['mentioned_mobile_list'] = ['15259202957'];
-            $content_2_2 =  urldecode(json_encode($this->returnParams($content)));
-            $result = loadc('HttpRequest')->POST(
-                'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=7ead27bf-a273-471c-897e-4628abaed805',
-                $content_2_2,
-                array(CURLOPT_HTTPHEADER => ['Content-Type: application/json; charset=UTF-8'])
-            );
-
-        }
-
         echo '饭点定时任务成功' . date('Y-m-d H:i:s') . "\n";
-        return false;
+        return false;//返回false普通日志将收集错误日志
     }
 
 
@@ -191,7 +181,7 @@ class Test2Controller extends BaseController
             return true;
         }
 
-        if ($hour < 9 || ($hour == 9 && $min < 30) || ($hour == 12 && $min > 0) || $hour == 13 || $hour > 21) {
+        if ($hour < 9 || ($hour == 9 && $min < 30) || ($hour == 12 && $min > 0) || $hour == 13 || $hour > 21 || ($hour == 21 && $min > 0)) {
             echo '非工作时间！' . "\n";
             return true;
         }
@@ -253,8 +243,6 @@ class Test2Controller extends BaseController
 
                     if ($hour == 19 && in_array($week, [5, 6])) {
                         $tips = $tips_arr[4];
-                    } elseif ($hour == 19) {
-                        $tips = $tips_arr[3];
                     }
 
                     if ($hour == 21) {
@@ -267,6 +255,8 @@ class Test2Controller extends BaseController
 
                     if ($hour == 18 && in_array($week, [5, 6])) {
                         $tips = $tips_arr[7];
+                    } elseif ($hour == 18) {
+                        $tips = $tips_arr[3];
                     }
                     break;
                 default:
@@ -299,6 +289,31 @@ class Test2Controller extends BaseController
         }
 
         echo '定时任务成功' . date('Y-m-d H:i:s') . "\n";
+        return true;
+    }
+
+    public function test3()
+    {
+////        //添加目录
+//        $arr = LoadFactory::setClassDir(['dir' => 'controllers/test','suffix' => 'Controller']);
+////        //选中目录
+//        LoadFactory::setDirMatchedStr('controllers/test');
+
+        $config = loadc('config')->get('', "worker");
+        //添加worker控制器目录(用于加载和调用)
+        LoadFactory::setClassDir(['dir' => $config['worker_path']['path'], 'suffix' => $config['worker_path']['suffix']]);
+        //选中控制器目录
+        LoadFactory::setDirMatchedStr($config['worker_path']['path']);
+        $hander = $config['workers']['controller_console_test2_test']['handler'];
+        $srvObj = LoadFactory::lc($hander[0]);//类
+        $ret = call_user_func_array([$srvObj, $hander[1]], []);
+
+//        LoadFactory::lc('test')->test();//类
+//
+//        LoadFactory::lf('test', 'OK');//函数
+//        LoadFactory::lc('log')->error(json_encode(['good'=>'更方便的加载方式1']));//类
+//        LoadFactory::log()->info('更方便的加载方式2');//类
+        echo 'good';
         return true;
     }
 }

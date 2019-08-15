@@ -1,23 +1,21 @@
 #!/bin/bash
-pidPath="../../data/log/crond.pid"
+pidPath="../../data/log/workerServer.pid"
 phpbin="/usr/local/php/bin/php"
-logFile="../../data/log/crond.log"
+logFile="../../data/log/workerServer.log"
 
 cd /data/wwwroot/www/free_mvc/fky/cli/
-#cd ../
-#cd cli
 #crond server
 stop() {
     if [ -f $pidPath ]; then
         pid=`cat $pidPath`
-        echo "stop crond server, pid="$pid"..."
+        echo "stop worker server, pid="$pid"..."
 
         check_crond_exist
         pidIsExits=$?
         if [ $pidIsExits -eq 1 ]; then
             kill $pid
         else
-            echo "crond server not exist."
+            echo "worker server not exist."
             rm -f $pidPath
         fi
 
@@ -32,32 +30,31 @@ stop() {
             try=`expr $try + 1`
             sleep 1
         done
-        echo "stop crond ok."
+        echo "stop workerServer ok."
     fi
 }
 
-#启动crond server
+#启动workerServer
 start() {
     check_crond_exist
     pidIsExits=$?
     if [ $pidIsExits -eq 1 ]; then
-        echo "crond server had running..."
+        echo "workerServer server had running..."
     else
-        echo "start crond server..."
-        #启动并传递一个d参数作为后台进程
-        cmd=$phpbin" crond.php -d"
+        echo "start workerServer server..."
+        cmd=$phpbin" workerServer.php -d"
         $cmd &> $logFile
     fi
 }
 
-#检测crond进程是否存在
+#检测workerServer进程是否存在
 check_crond_exist() {
     if [ ! -f $pidPath ]; then
         return 0
     fi
 
     pid=`cat $pidPath`
-    pids=`ps aux | grep crond.php | grep -v grep | awk '{print $2}'`
+    pids=`ps aux | grep workerServer.php | grep -v grep | awk '{print $2}'`
     pidIsExits=0;
     for i in ${pids[@]}
         do
@@ -70,7 +67,7 @@ check_crond_exist() {
     return  $pidIsExits
 }
 
-#当输入的参数为
+
 case "$1" in
 start)
     start
@@ -79,6 +76,6 @@ stop)
     stop
     ;;
 *)
-    echo $"Usage: crond.sh {start|stop|help}"
+    echo $"Usage: workerServer.sh {start|stop|help}"
     exit 1
 esac

@@ -1,6 +1,6 @@
 <?php
 namespace controllers\test;
-use controllers\test2\Test2Controller;
+use controllers\console\Test2Controller;
 use fky\traits\BaseTool;
 /**
 * \HomeController

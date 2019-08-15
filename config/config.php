@@ -1,11 +1,14 @@
 <?php 
 return [
+    'env' => 'dev',//环境名
+
     'db'=> [
             'database_type' => 'mysql',
             'database_name' => 'test',
             'server' => 'localhost',
             'username' => 'root',
-            'password' => '123456',
+            'password' => '',
+//            'password' => '123456',
             'charset' => 'utf8',
              // 可选参数
             'port' => 3306,
@@ -27,8 +30,8 @@ return [
     ],
 
     'cmd_path' => [
-            //命令文件夹
-            'path'  => __DIR__ . '/../'.'controllers/console/',
+            //根目录下对应的命令文件夹
+            'path'  => 'controllers/console/',
             //对应的命名空间
             'namespace'  => 'controllers\console',
     ],

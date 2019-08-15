@@ -14,7 +14,7 @@ loadc('db',loadc('config')->get("db", "config"));
 loadc('loader')->run();
 
 $cmd_config = loadc('config')->get("cmd_path", "config");
-$result = loadf('cliRun', $cmd_config['path'], $cmd_config['namespace']);
+$result = loadf('cliRun', FKY_PROJECT_PATH . $cmd_config['path'], $cmd_config['namespace']);
 if (!isset($result['code']) || $result['code'] == -1) {
 	//搜集没有返回true的任务日志
     if (isset($result['msg'])) {

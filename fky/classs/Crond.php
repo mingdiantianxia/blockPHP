@@ -98,6 +98,15 @@ class Crond
                     //启动任务
                     $cronWorker =  new Process(function (Process $worker) use($job) {
                         $this->doCronTask($worker, $job);
+
+                        //主进程开启管道后，子进程可以使用此方式与主进程进行管道通信
+//                        \Swoole\Event::add($worker->pipe, function($pipe) use ($worker) {
+//                            $recv = $worker->read();
+//                            echo "From Master: $recv\n";
+//                            $worker->write("hello master\n");
+////                            sleep(2);
+////                            $worker->exit(0);
+//                        });
                     });
 
                     $pid = $cronWorker ->start();
@@ -106,6 +115,7 @@ class Crond
                         continue;
                     }
                     $this->_runningTasks[$job['id']] = $pid;//记录该定时任务的子进程id
+                    //主进程与子进程通信
                     $cronWorker->write(json_encode($job));
                 }
             }
