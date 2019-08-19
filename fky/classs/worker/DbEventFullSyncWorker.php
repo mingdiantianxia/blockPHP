@@ -1,24 +1,18 @@
 <?php
 namespace fky\classs\worker;
-use lwmf\base\Config;
-use lwmf\base\Logger;
-use lwmf\base\WorkerApplication;
-use lwmf\datalevels\Redis;
-use lwmf\services\ServiceFactory;
+use fky\classs\Config;
+use fky\classs\LoadFactory;
+use fky\classs\Phpredis as Redis;
 use Swoole\Timer;
 
 /**
  * 全量同步
  * Class DbEventFullSyncWorker
- * @package lwmf\base\worker
  */
 class DbEventFullSyncWorker
 {
     //同步任务
-    const CACHE_SYNC_TASKS = "zpz_cy_dbevent_fullsync_task";
-
-    //打印机同步状态时间间隔
-    const PRINT_STATIS_INTERVAL = 10;
+    const CACHE_SYNC_TASKS = "fky_dbevent_fullsync_task";
 
     /**
      * event listener配置
@@ -70,16 +64,16 @@ class DbEventFullSyncWorker
     private $_eventServer;
 
     /**
-     * @var WorkerApplication
+     * 数据库连接实例
      */
-    private $_app;
+    private $_dbInstance;
 
     public function __construct($eventServer, $isTask = false)
     {
-        $this->_app = \YII::app();
         $this->_conf = Config::getInstance()->get('', 'db_event_listener');
         $this->_redis = Redis::getInstance();
         $this->_eventServer = $eventServer;
+        $this->_dbInstance = LoadFactory::lc('db', Config::getInstance()->get('db', 'config'));
 
         if (!$isTask) {
             //task环境不需要初始化，任务管理器
@@ -202,8 +196,10 @@ class DbEventFullSyncWorker
      * @param string $table - 表名
      * @param string $listenerId - 监听器id
      * @param string $pk - 主键id
+     * @param int $offset - 当前同步位置
+     * @param int $maxOffset - 最大位置
      */
-    public function addTask($table, $listenerId, $pk)
+    public function addTask($table, $listenerId, $pk, $offset = 0 , $maxOffset = 0)
     {
         $table = trim($table);
         $listenerId = trim($listenerId);
@@ -211,7 +207,7 @@ class DbEventFullSyncWorker
             return;
         }
 
-        $status = ['listenerId' => $listenerId, 'sync' => [], 'isSync' => 0, 'offset' => 0, "pk" => $pk, "maxOffset" => 0];
+        $status = ['listenerId' => $listenerId, 'sync' => [], 'isSync' => 0, 'offset' => $offset, "pk" => $pk, "maxOffset" => $maxOffset];
         $this->_status[$table] = $status;
         $this->_redis->hSet(self::CACHE_SYNC_TASKS, $table, json_encode($status));
     }
@@ -276,8 +272,7 @@ class DbEventFullSyncWorker
         if(is_numeric($msg['beginOffset']))
         {
             $sql = "select * from {$currentSyncTable} where {$pk} >= {$msg['beginOffset']} and {$pk} < {$msg['endOffset']}";
-            $cmd = \Yii::app()->db->createCommand($sql);
-            $datas = $cmd->queryAll();
+            $datas = $this->_dbInstance->query($sql)->fetchAll();
         }
         else
         {
@@ -286,12 +281,7 @@ class DbEventFullSyncWorker
         
         if (!empty($datas)) {
             $evs = [];
-            $p = '/dbname=(\w+)/';
-            $result = null;
-            $scheme ="weixin";
-            if (preg_match($p, \Yii::app()->db->connectionString, $result)) {
-                $scheme = $result[1];
-            }
+            $scheme = Config::getInstance()->get('db.database_name', 'config');
 
             //处理带scheme的表名
             $p = '/(\w+)\.(\w+)/';
@@ -318,31 +308,23 @@ class DbEventFullSyncWorker
         $listenConf = $this->_conf['listeners'][$listenerId];
         $hander = $listenConf['handler'];
 
-        //设置路由
-        $route = implode("->", $hander);
-        Logger::$route = $route;
-        $this->_app->setRoute($route);
-        $this->_app->run();
-        //设置开始执行时间
-        \Yii::setBeginTime();
-
         //失败无限重试
         while (true) {
-            $srvObj = ServiceFactory::getService($hander[0]);
-            Logger::debug("listener handler execute handler=" . json_encode($hander));
+            $srvObj = LoadFactory::lc($hander[0]);//单例实例化类
+            LoadFactory::lc('log')->debug("listener handler execute handler=" . json_encode($hander));
+
             $ret = call_user_func_array([$srvObj, $hander[1]], [$evs]);
-            Logger::debug("listener handler execute handler result=" . json_encode($ret));
+            LoadFactory::lc('log')->debug("listener handler execute handler result=" . json_encode($ret));
+
 
             if (!empty($ret)) {
                 //处理成功
                 break;
             } else {
-                Logger::error("retry execute handler = " . json_encode($hander));
+                LoadFactory::lc('log')->error("retry execute handler = " . json_encode($hander));
                 sleep(1);
             }
         }
-        \Yii::setEndTime();
-        $this->_app->end(0, false);
     }
 
     public function finishConcurrencyTask($msg)
@@ -381,8 +363,7 @@ class DbEventFullSyncWorker
             $pk = $status['pk'];
         }
         $sql = "select max({$pk}) as maxId, min({$pk}) as minId from {$this->_currentSyncTable}";
-        $cmd = \Yii::app()->db->createCommand($sql);
-        $data = $cmd->queryRow();
+        $data = $this->_dbInstance->query($sql)->fetch();
         if (!empty($data)) {
             if($data['maxId'] > 0)
             {

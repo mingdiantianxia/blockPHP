@@ -191,7 +191,34 @@ class Log
      */
     public function log($level, $message, array $context = array())
     {
-        return $this->_logger->log($level, $message, $context);
+        $msg = $message;
+        if (is_object($message) || is_array($message)) {
+            $msg = var_export($message, true);
+        }
+
+        //获取输入日志的上下文环境
+        $bt = debug_backtrace(0, 3);
+
+        $msg .= " ["; //附加调试参数
+        if (count($bt) == 3) {
+            $callContext = $bt[1];
+
+            $newCategory = $callContext['class'];
+            $newCategory .= '::' . $callContext['function'];
+            if (isset($callContext['line'])) {
+                $newCategory .= '-' . $callContext['line'];
+            }
+            $msg .= "class={$newCategory}";
+
+            //附加函数参数
+            $args = $callContext['args'];
+            if  (!empty($args)) {
+                $args = json_encode($args);
+                $msg .= " args={$args}";
+            }
+        }
+        $msg .= ']';
+        return $this->_logger->log($level, $msg, $context);
     }
 
     /**
@@ -205,7 +232,34 @@ class Log
      */
     public function debug($message, array $context = array())
     {
-        return $this->_logger->debug($message, $context);
+        $msg = $message;
+        if (is_object($message) || is_array($message)) {
+            $msg = var_export($message, true);
+        }
+
+        //获取输入日志的上下文环境
+        $bt = debug_backtrace(0, 3);
+
+        $msg .= " ["; //附加调试参数
+        if (count($bt) == 3) {
+            $callContext = $bt[1];
+
+            $newCategory = $callContext['class'];
+            $newCategory .= '::' . $callContext['function'];
+            if (isset($callContext['line'])) {
+                $newCategory .= '-' . $callContext['line'];
+            }
+            $msg .= "class={$newCategory}";
+
+            //附加函数参数
+            $args = $callContext['args'];
+            if  (!empty($args)) {
+                $args = json_encode($args);
+                $msg .= " args={$args}";
+            }
+        }
+        $msg .= ']';
+        return $this->_logger->debug($msg, $context);
     }
 
     /**
@@ -316,7 +370,34 @@ class Log
      */
     public function error($message, array $context = array())
     {
-        return $this->_logger->error($message, $context);
+        $msg = $message;
+        if (is_object($message) || is_array($message)) {
+            $msg = var_export($message, true);
+        }
+
+        //获取输入日志的上下文环境
+        $bt = debug_backtrace(0, 3);
+
+        $msg .= " ["; //附加调试参数
+        if (count($bt) == 3) {
+            $callContext = $bt[1];
+
+            $newCategory = $callContext['class'];
+            $newCategory .= '::' . $callContext['function'];
+            if (isset($callContext['line'])) {
+                $newCategory .= '-' . $callContext['line'];
+            }
+            $msg .= "class={$newCategory}";
+
+            //附加函数参数
+            $args = $callContext['args'];
+            if  (!empty($args)) {
+                $args = json_encode($args);
+                $msg .= " args={$args}";
+            }
+        }
+        $msg .= ']';
+        return $this->_logger->error($msg, $context);
     }
 
     /**

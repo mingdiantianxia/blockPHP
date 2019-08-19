@@ -99,9 +99,12 @@ class DbEventServer {
             $progName = "{$env}-DbEventWorker-{$worker_id}";
 
             //初始化listener 管理器
-            if ($worker_id == 0) {
-                //只在第一个worker进程启动
-                $this->_eventWorker = new DbEventListenerManage();
+            if ($worker_id == 0) { //只在第一个worker进程启动
+
+                //是否开启增量监听器worker
+                if ($this->_conf['openListeners']) {
+                    $this->_eventWorker = new DbEventListenerManage();
+                }
                 $this->_log("start DbEventFullSyncWorker...");
                 $this->_fullSyncWorker = new DbEventFullSyncWorker($this);
             }
@@ -119,7 +122,10 @@ class DbEventServer {
     {
         if(!$serv->taskworker) {
             if ($worker_id == 0) {
-                $this->_eventWorker->close();
+                //是否开启增量监听器worker
+                if ($this->_conf['openListeners']) {
+                    $this->_eventWorker->close();
+                }
             }
         }
     }
@@ -159,7 +165,17 @@ class DbEventServer {
             $pk = $get['pk'];
         }
 
-        $this->_fullSyncWorker->addTask($table, $listenerId, $pk);
+        $offset = 0;
+        if (isset($get['offset']) && !empty($get['offset'])) {
+            $offset = $get['offset'];
+        }
+
+        $maxOffset = 0;
+        if (isset($get['maxOffset']) && !empty($get['maxOffset'])) {
+            $maxOffset = $get['maxOffset'];
+        }
+
+        $this->_fullSyncWorker->addTask($table, $listenerId, $pk, $offset, $maxOffset);
         $response->end("ok");
     }
 

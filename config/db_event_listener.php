@@ -1,11 +1,10 @@
 <?php
-use lwm\services\SrvType;
 return [
     "user" => 'www',
-    "pid" => LWM_PROJECT_PATH .'/runtime/dbevent_worker.pid',
-    "log" => LWM_PROJECT_PATH .'/runtime/dbevent_worker.log',
+    "pid" => FKY_PROJECT_PATH .'/data/log/dbevent_worker.pid',
+    "log" => FKY_PROJECT_PATH .'/data/log/dbevent_worker.log',
     //php命令路径
-    "php" => "/alidata/server/php/bin/php",
+    "php" => "/usr/local/php/bin/php",
     //db event worker监听地址
     "listen" => [
         "ip" => "127.0.0.1",
@@ -22,6 +21,8 @@ return [
         "addrs" => "172.16.81.52:9092,172.16.81.53:9092,172.16.81.54:9092",
         "binlogTopic" => "dev2-rds-binlog",
     ],
+    //是否开启增量监听器
+    "openListeners" => false,
     "listeners" => [
         //监听器配置
         /*"listener-demo" => [
@@ -47,52 +48,6 @@ return [
             //处理成功返回true, 失败返回false, 失败会无限重试.
             "handler" => [SrvType::COMMON_HELPER, 'test']
         ],*/
-		//用户数据同步
-        "customer" => [
-            "subscribe" => [
-               "weixin" => ["wx_lewaimai_order_customer"]
-            ],
-            "workers" => 3,
-            "version" => 1,
-            "batchSize" => 128,
-            "handler" => [SrvType::CRM_ACCOUNT_ORDER_CUSTOMER, 'synchronizecustomerdata']
-		],
-        //商户数据同步
-        "merchant" => [
-            "subscribe" => [
-               "platform" => ["pf_merchant_account"],
-               "weixin" =>[
-                    "wx_admin_parameter_setting",
-                    "wx_shop_dinnercash_open",
-                    "wx_admin_wxapp_setting",
-                    "wx_marketing_open",
-                    "wx_merchant_member_fun",
-                    "wx_operation_fun"
-                ],
-               "lssystem" =>[
-                    "wx_admin_parameter_setting",
-                    "wx_shop_dinnercash_open",
-                    "wx_admin_wxapp_setting",
-                    "wx_marketing_open",
-                    "wx_merchant_member_fun",
-                    "wx_operation_fun"
-                ],
-            ],
-            "workers" => 3,
-            "version" => 1,
-            "batchSize" => 128,
-            "handler" => [SrvType::COMMOM_MERCHANT_ACCOUNT_MERCHANTACCOUNT, 'synchronizemerchantdata']
-        ],
-        //商品数据同步
-        "food" => [
-            "subscribe" => [
-               "weixin" => ["wx_food"]
-            ],
-            "workers" => 3,
-            "version" => 1,
-            "batchSize" => 128,
-            "handler" => [SrvType::COMMON_FOOD, 'synchronizefooddata']
-        ],
         //会员数据同步
         "member" => [
             "subscribe" => [
@@ -101,7 +56,7 @@ return [
             "workers" => 4,
             "version" => 1,
             "batchSize" => 128,
-            "handler" => [SrvType::CRM_ACCOUNT_MEMBER, 'synchronizememberdata']
+            "handler" => ['controllers\test\testController', 'test']
         ],
     ]
 ];

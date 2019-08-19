@@ -65,7 +65,7 @@ return [
             //任务处理器, 格式[队列文件夹下的控制器名/或者带命名空间的类名, '方法名']
     		"handler"    => ['controllers\test\testController', 'test'],
             //任务描述信息
-          "desc"  => '描述信息',
+            "desc"  => '描述信息',
     	],
     ]
 ];
