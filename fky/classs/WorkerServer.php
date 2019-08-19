@@ -111,20 +111,20 @@ class WorkerServer
             }
 
             //控制测试环境的进程数
-//            if (in_array(loadc('config')->get("env"), ['dev'])) {
-//                $jWorkers = 0;
-//                if (isset($this->_queueWorkers[$jobName])) {
-//                    $jWorkers = $this->_queueWorkers[$jobName];
-//                }
-//                else {
-//                    $this->_queueWorkers[$jobName] = 1;
-//                }
-//                if ($jWorkers > 0) {
-//                    continue;
-//                }
-//                //默认启动一个进程用于测试
-//                $conf['threadNum'] = 1;
-//            }
+            if (in_array(loadc('config')->get("env"), ['dev'])) {
+                $jWorkers = 0;
+                if (isset($this->_queueWorkers[$jobName])) {
+                    $jWorkers = $this->_queueWorkers[$jobName];
+                }
+                else {
+                    $this->_queueWorkers[$jobName] = 1;
+                }
+                if ($jWorkers > 0) {
+                    continue;
+                }
+                //默认启动一个进程用于测试
+                $conf['threadNum'] = 1;
+            }
 
             //该队列目前有多少个worker进程在执行
             $workers = $this->_getWorkers($jobName);

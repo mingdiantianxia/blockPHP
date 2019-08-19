@@ -2,10 +2,33 @@
 namespace fky\classs;
 require __DIR__.'/../inc/db/Medoo.php';
 
-class Db extends \Medoo\Medoo{
+class Db extends \Medoo\Medoo
+{
+    /**
+     * @var Db实例数组
+     */
+    private static $_instance = [];
+
 	public function __construct($options = null){
 		parent::__construct($options);
 	}
+
+    /**
+     * 获取db实例
+     * @param string $connectName 数据库连接配置名
+     * @return Db
+     */
+    public static function getInstance($connectName = 'db')
+    {
+        if (empty($connectName)) {
+            return false;
+        }
+
+        if (!isset(self::$_instance[$connectName])) {
+            self::$_instance[$connectName] = new Db(loadc('config')->get($connectName, "config"));
+        }
+        return self::$_instance[$connectName];
+    }
 
 }
 

@@ -1,5 +1,6 @@
 <?php
 namespace fky\classs;
+use fky\classs\Config;
 
 /**
  * 依赖redis扩展
@@ -106,11 +107,10 @@ class Phpredis
     }
 
     /**
-     * 获取当前原始的redis实例
-     * @author fukaiyao
-     * @return Redis
+     * 返回redis原始实例
+     * @return \Redis
      */
-    public function getRedis()
+    public function getOriginInstance()
     {
         return $this->_redis;
     }
