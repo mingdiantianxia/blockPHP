@@ -1,8 +1,8 @@
 <?php 
 namespace fky\classs;
 require __DIR__.'/../inc/predis/autoload.php';
-use Predis;
-class Redis extends Predis\Client{
+use Predis\Client;
+class Redis extends Client{
 
     /**
      * 集群设置

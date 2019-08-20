@@ -2,7 +2,7 @@
 // fix for fcgi
 defined('STDIN') or define('STDIN', fopen('php://stdin', 'r'));
 
-define('FKY_PROJECT_PATH',  dirname(dirname(__DIR__)));
+define('FKY_PROJECT_PATH',  __DIR__ .DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR);
 
 require_once FKY_PROJECT_PATH.'fky/FkyLoad.php';
 

@@ -1,6 +1,7 @@
 <?php 
 namespace fky\classs;
 require __DIR__.'/../inc/db/Medoo.php';
+use fky\classs\Config;
 
 class Db extends \Medoo\Medoo
 {
@@ -25,7 +26,8 @@ class Db extends \Medoo\Medoo
         }
 
         if (!isset(self::$_instance[$connectName])) {
-            self::$_instance[$connectName] = new Db(loadc('config')->get($connectName, "config"));
+//            self::$_instance[$connectName] = new Db(loadc('config')->get($connectName, "config"));
+            self::$_instance[$connectName] = new Db(Config::getInstance()->get($connectName, 'config'));
         }
         return self::$_instance[$connectName];
     }

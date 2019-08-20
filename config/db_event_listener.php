@@ -8,7 +8,8 @@ return [
     //db event worker监听地址
     "listen" => [
         "ip" => "127.0.0.1",
-        "port" => 12359,
+//        "port" => 12359,
+        "port" => 8181,
     ],
     //全量同步并发数
     "fullsyncWorkers" => 5,
@@ -25,7 +26,7 @@ return [
     "openListeners" => false,
     "listeners" => [
         //监听器配置
-        /*"listener-demo" => [
+        /*"listenerId" => [
             //需要订阅的数据库表，格式:
             //         "数据库名" => ["表1", "表2", "表3"]
             "subscribe" => [
@@ -49,14 +50,23 @@ return [
             "handler" => [SrvType::COMMON_HELPER, 'test']
         ],*/
         //会员数据同步
-        "member" => [
+//        "member" => [
+//            "subscribe" => [
+//               "weixin" => ["wx_lewaimai_member"]
+//            ],
+//            "workers" => 4,
+//            "version" => 1,
+//            "batchSize" => 128,
+//            "handler" => ['controllers\test\testController', 'test']
+//        ],
+        "test" => [
             "subscribe" => [
-               "weixin" => ["wx_lewaimai_member"]
+                "weixin" => ["wx_lewaimai_member"]
             ],
             "workers" => 4,
             "version" => 1,
             "batchSize" => 128,
-            "handler" => ['controllers\test\testController', 'test']
+            "handler" => ['controllers\worker\DbWorkerController', 'synchronizeDbData']
         ],
     ]
 ];

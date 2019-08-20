@@ -55,7 +55,8 @@ class Phpredis
 
     public function __construct()
     {
-        $this->_conf = loadc('config')->get("redis", "config");//redis配置
+//        $this->_conf = loadc('config')->get("redis", "config");//redis配置
+        $this->_conf = Config::getInstance()->get('redis', 'config');//redis配置
         if (empty($this->_conf) || !isset($this->_conf['host']) || !isset($this->_conf['port'])) {
             throw new \Exception("redis config invalid.");
         }
@@ -128,7 +129,9 @@ class Phpredis
             return $redis_table_instance[$db_table];
         }
         $redis = new \Redis();
-        $conf = loadc('config')->get("redis", "config");//redis配置
+//        $conf = loadc('config')->get("redis", "config");//redis配置
+        $conf = Config::getInstance()->get('redis', 'config');//redis配置
+
         $ret = $redis->connect($conf['host'], $conf['port'], $conf['timeout']);
 
         //密码不为空, 则需要密码验证

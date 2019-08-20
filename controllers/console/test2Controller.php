@@ -3,7 +3,10 @@
 namespace controllers\console;
 
 use controllers\BaseController;
+use fky\classs\Config;
+use fky\classs\Db;
 use fky\classs\LoadFactory;
+use fky\classs\Phpredis;
 
 /**
  * 定时任务测试
@@ -253,6 +256,11 @@ class Test2Controller extends BaseController
                 case 30:
                     $tips = $tips_arr[1];
 
+                    if ($hour == 9) {
+                        $restDays = (strtotime('2019-09-27 00:00:00') - strtotime(date('Y-m-d').' 00:00:00'))/86400;
+                        $tips = '今天'.date('Y-m-d').'，离申请离职还有'.$restDays.'天！';
+                    }
+
                     if ($hour == 18 && in_array($week, [5, 6])) {
                         $tips = $tips_arr[7];
                     } elseif ($hour == 18) {
@@ -294,25 +302,32 @@ class Test2Controller extends BaseController
 
     public function test3()
     {
-////        //添加目录
-//        $arr = LoadFactory::setClassDir(['dir' => 'controllers/test','suffix' => 'Controller']);
-////        //选中目录
-//        LoadFactory::setDirMatchedStr('controllers/test');
+//        $tasks = Phpredis::getInstance()->delete('fky_dbevent_fullsync_task');
+//        $key_arr = Phpredis::getInstance()->keys('*');
+//        Phpredis::getInstance()->delete($key_arr);
+//        var_dump($tasks);die;
 
-        $config = loadc('config')->get('', "worker");
-        //添加worker控制器目录(用于加载和调用)
-        LoadFactory::setClassDir(['dir' => $config['worker_path']['path'], 'suffix' => $config['worker_path']['suffix']]);
-        //选中控制器目录
-        LoadFactory::setDirMatchedStr($config['worker_path']['path']);
-        $hander = $config['workers']['controller_console_test2_test']['handler'];
-        $srvObj = LoadFactory::lc($hander[0]);//类
-        $ret = call_user_func_array([$srvObj, $hander[1]], []);
+//        $paramArray = $this->GPC();
 
-//        LoadFactory::lc('test')->test();//类
+        $tableName = 'wx_access_token';
+        $dbInstance = LoadFactory::lc('db', Config::getInstance()->get('db', 'config'));
+        $sql = "select * from {$tableName} limit 500";
+        $datas = $dbInstance->pdo->query($sql, \PDO::FETCH_ASSOC)->fetchAll();
 //
-//        LoadFactory::lf('test', 'OK');//函数
-//        LoadFactory::lc('log')->error(json_encode(['good'=>'更方便的加载方式1']));//类
-//        LoadFactory::log()->info('更方便的加载方式2');//类
+        $dbInstance2 = Db::getInstance('slaveDb');
+        $result = $dbInstance2->insert($tableName, $datas);
+        var_export($result);die;
+
+//        $paramArray = array(
+//            'table' => 'wx_access_token',
+//            'listenerid' => 'test',
+//            'pk' => 'admin_id',
+//            'offset' => 1,
+//            'maxOffset' => 500,
+//        );
+//        $queryStr = http_build_query($paramArray);
+//        $data = loadc('HttpRequest')->GET('http://127.0.0.1:8181?'.$queryStr);
+//        var_dump($data);
         echo 'good';
         return true;
     }

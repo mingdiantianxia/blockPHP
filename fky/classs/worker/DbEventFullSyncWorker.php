@@ -272,7 +272,8 @@ class DbEventFullSyncWorker
         if(is_numeric($msg['beginOffset']))
         {
             $sql = "select * from {$currentSyncTable} where {$pk} >= {$msg['beginOffset']} and {$pk} < {$msg['endOffset']}";
-            $datas = $this->_dbInstance->query($sql)->fetchAll();
+            echo $sql;
+            $datas = $this->_dbInstance->pdo->query($sql, \PDO::FETCH_ASSOC)->fetchAll();
         }
         else
         {
@@ -363,7 +364,7 @@ class DbEventFullSyncWorker
             $pk = $status['pk'];
         }
         $sql = "select max({$pk}) as maxId, min({$pk}) as minId from {$this->_currentSyncTable}";
-        $data = $this->_dbInstance->query($sql)->fetch();
+        $data = $this->_dbInstance->pdo->query($sql, \PDO::FETCH_ASSOC)->fetch();
         if (!empty($data)) {
             if($data['maxId'] > 0)
             {
@@ -388,12 +389,13 @@ class DbEventFullSyncWorker
 
     private function _selectNextTask()
     {
-        foreach ($this->_status as $table => $status) {
-            $this->_currentSyncTable = $table;
-            break;
-        }
         $this->_runningTask = [];
         if (!empty($this->_status)) {
+            foreach ($this->_status as $table => $status) {
+                $this->_currentSyncTable = $table;
+                break;
+            }
+
             $this->_status[$this->_currentSyncTable]['isSync'] = 1;
         }
     }

@@ -1,7 +1,7 @@
 #!/bin/bash
-pidPath="../../data/log/dbEventWorker.pid"
+pidPath="../../data/log/dbevent_worker.pid"
 phpbin="/usr/local/php/bin/php"
-logFile="../../data/log/dbEventWorker.log"
+logFile="../../data/log/dbevent_worker.log"
 
 cd /data/wwwroot/www/free_mvc/fky/cli/
 #crond server
