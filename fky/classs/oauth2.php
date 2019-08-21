@@ -20,9 +20,9 @@ class Oauth2 {
     protected $server;
     public function __construct(array $database)
     {
-        $conn = mysql_connect($database['host'],$database['username'],$database['password']);
-        mysql_query('CREATE DATABASE  IF NOT EXISTS `'.$database['dbname'].'` Character Set UTF8',$conn);
-        mysql_close($conn);
+        $conn = mysqli_connect($database['host'],$database['username'],$database['password']);
+        mysqli_query($conn, 'CREATE DATABASE  IF NOT EXISTS `'.$database['dbname'].'` Character Set UTF8');
+        mysqli_close($conn);
         $pdo = new \PDO('mysql:host='.$database['host'].';dbname='.$database['dbname'], $database['username'], $database['password']);
         $this->storage = new Pdo($pdo);
         $sql = $this->storage->getBuildSql($database['dbname']);
