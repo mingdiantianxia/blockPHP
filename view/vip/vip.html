@@ -334,14 +334,14 @@ $(function(){
 
 });
 
-var threshold = 160; // 打开控制台的宽或高阈值
+var threshold = 194; // 打开控制台的宽或高阈值
 // 每秒检查一次
 setInterval(function() {
     if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
         // 如果打开控制台，则刷新页面
         // window.location.reload();
         //window.location.href = 'http://baidu.com/';
-    consoleOpenCallback();
+        consoleOpenCallback();
     }
     $('iframe').each(function(e){
         if($(this).data('iframe') != 'my') {

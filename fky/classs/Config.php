@@ -17,6 +17,13 @@ class Config
     private $_configCache = array();
 
     /**
+     * 环境参数缓存
+     */
+    private $_envCache = null;
+
+    private $_envHasMerge = array();
+
+    /**
      * 获取单例
      * @return Config
      */
@@ -40,7 +47,8 @@ class Config
      */
     public function get($item = "", $type = "config", $isFlush = false, $configPathName = 'config', $appConfigPathName = '')
     {
-        $this->_load($type, $isFlush,$configPathName, $appConfigPathName);
+        $this->_load($type, $isFlush, $configPathName, $appConfigPathName);
+        $this->_loadEnv($type, $isFlush, $configPathName);
 
         if (empty($item)) {
             return $this->_configCache[$type];
@@ -97,6 +105,89 @@ class Config
             //应用配置覆盖默认配置
             $this->_configCache[$type] = $this->_mergeArray($this->_configCache[$type], $appConfig);
         }
+    }
+
+    /**
+     * 加载环境参数
+     * @param string $type  - 配置文件类型
+     * @param bool $isFlush - 是否刷新缓存，从新加载配置
+     */
+    private function _loadEnv($type, $isFlush = false, $configPathName = 'config')
+    {
+        if (isset($this->_envHasMerge[$type]) && $this->_envHasMerge[$type]) {
+            //已经合并过了
+            return ;
+        }
+
+        if (!isset($this->_configCache[$type])) {
+            return '';
+        }
+
+        if (!$isFlush && ! empty($this->_envCache)) {
+            if (!isset($this->_envCache[$type])) {
+                //没有环境参数
+                return ;
+            }
+            $this->_configCache[$type] = $this->_mergeArray($this->_configCache[$type], $this->_envCache[$type]);
+            $this->_envHasMerge[$type] = true;
+            return;
+        }
+
+        $pPath = $this->_pPath;
+        $file = "{$pPath}/{$configPathName}/env.php";
+        if (!file_exists($file) || isset($this->_envHasMerge[$type])) {
+            return ;
+        }
+
+        $envs = require $file;
+        if (empty($envs) || !is_array($envs)) {
+            throw new \Exception("env config invalid.");
+        }
+
+        //格式化环境参数
+        $retEnv = array();
+        foreach ($envs as $key => $value) {
+            $keys  = explode(".", $key);
+            if (empty($keys)) {
+                throw new \Exception("env config invalid, item={$key}");
+            }
+            $ret = null;
+            try {
+                $ret = $this->_createArrayByKey($keys, $value);
+            } catch (\Exception $e) {
+                throw new \Exception("env config invalid, item={$key}");
+            }
+
+            //递归合并数组
+            $retEnv = array_merge_recursive($retEnv, $ret);
+        }
+
+        //cache 缓存参数
+        $this->_envCache = $retEnv;
+
+        //覆盖默认参数
+        $this->_configCache = $this->_mergeArray($this->_configCache, $retEnv);
+        $this->_envHasMerge[$type] = true;
+    }
+
+    private function _createArrayByKey($keys, $value)
+    {
+        if (empty($keys)) {
+            return null;
+        }
+        $key = array_shift($keys);
+        if (empty($key)) {
+            throw new \Exception("env config item invalid");
+        }
+
+        $ret = array();
+        if (empty($keys)) {
+            $ret[$key] = $value;
+        }
+        else {
+            $ret[$key] = $this->_createArrayByKey($keys, $value);
+        }
+        return $ret;
     }
 
     /**

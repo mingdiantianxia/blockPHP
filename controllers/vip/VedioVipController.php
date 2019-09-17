@@ -8,10 +8,21 @@ use controllers\BaseController;
 class VedioVipController extends BaseController
 {
 	use BaseTool;
+	private $_key = '123567';
   
   public function Vip()
   {
      @session_start();
+//            unset($_SESSION['privateKey']);
+      if (!isset($_SESSION['privateKey']) || $_SESSION['privateKey'] != $this->_key) {
+          if ($this->GPC('auth_key') && $this->_key == $this->GPC('auth_key')) {
+              $_SESSION['privateKey'] = $this->GPC('auth_key');
+              $this->redirect('/vip/');
+          }
+          echo loadc('template')->make('vip/auth', [])->render();
+          return;
+      }
+
      $token = uniqid();
      $_SESSION['Myvip_token'] = ['expiration'=>1,'token'=>$token,'time'=>time()];
      echo loadc('template')->make('vip/vip_start', ['token' => $token])->render();

@@ -180,4 +180,12 @@ trait BaseTool {
         }
 
     }
+
+    public function redirect($url,$statusCode=302)
+    {
+        if(substr($url, 0, 1) == '/') {
+            $url = ltrim($url , '/');
+        }
+        header('Location: ' . loadf('getHost') . $url, true, $statusCode);
+    }
 }
