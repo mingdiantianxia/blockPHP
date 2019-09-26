@@ -15,6 +15,12 @@ class SyncDatabaseController extends BaseController
     public function syncDatabase()
     {
         set_time_limit(0);
+
+        //需要同步的数据库数组
+        $syncDatabaseArr = ['agent', 'jinxiaocun', 'lsjinxiaocun', 'lssystem', 'platform', 'weixin'];
+        //每个数据表最大条数
+        $limit = 500;
+
         $dbInstance = LoadFactory::lc('db', Config::getInstance()->get('db', 'config'));
 
         $databases = $dbInstance->pdo->query('show databases', \PDO::FETCH_ASSOC)->fetchAll();
@@ -25,7 +31,7 @@ class SyncDatabaseController extends BaseController
         $redis_databasekey = 'dbSyncFinishDatabase_';
 
         foreach ($databases as $key => $database) {
-            if (in_array($database['Database'], ['agent', 'jinxiaocun', 'lsjinxiaocun', 'lssystem', 'platform', 'weixin'])) {
+            if (in_array($database['Database'], $syncDatabaseArr)) {
 
                 $has = $redis->get($redis_databasekey . $database['Database']);
                 if ($has) {
@@ -55,24 +61,35 @@ class SyncDatabaseController extends BaseController
                     $createTableSql = str_replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS ', $createTableSql['Create Table']);
                     $createTableSql = str_replace('"', '`', $createTableSql);
 
+                    //去除不正确的时间默认值
+                    $createTableSql = preg_replace(["/datetime NOT NULL DEFAULT '[-0-9]*\s?[:0-9]*'/Us", "/datetime DEFAULT '[-0-9]*\s?[:0-9]*'/Us"], "datetime DEFAULT NULL", $createTableSql);
+                    $createTableSql = preg_replace(["/timestamp NOT NULL DEFAULT '[-0-9]*\s?[:0-9]*'/Us", "/timestamp DEFAULT '[-0-9]*\s?[:0-9]*'/Us"], "timestamp DEFAULT NULL", $createTableSql);
+                    $createTableSql = preg_replace(["/date NOT NULL DEFAULT '[-0-9]*\s?[:0-9]*'/Us", "/date DEFAULT '[-0-9]*\s?[:0-9]*'/Us"], "date DEFAULT NULL", $createTableSql);
+
                     mysqli_select_db($conn, $database['Database']);
                     mysqli_query($conn, "SET NAMES utf8");//设置字符集，防止插入数据时中文乱码
                     $createResult = mysqli_query($conn, $createTableSql);
                     if (!$createResult) {
+                        var_export($createTableSql);
+//                        preg_match("/datetime NOT NULL DEFAULT '[-0-9]*\s?[:0-9]*'/Us",$createTableSql,$matches1);
+//                        var_dump($matches1);die;
+
                         var_dump(mysqli_error_list($conn));
                         die('错误！');
                     }
                     mysqli_close($conn);
 
-                    $sql = "select * from {$tableName} limit 500";
+                    $sql = "select * from {$tableName} limit {$limit}";
                     $datas = $dbInstance->pdo->query($sql, \PDO::FETCH_ASSOC)->fetchAll();
                     if ($datas) {
                         $dbInstance2 = Db::getInstance('slaveDb');
 
                         $dbInstance2->pdo->query('use ' . $database['Database']);
+//                        $dbInstance2->pdo->query('use old_weixin2');
                         $result = $dbInstance2->insert($tableName, $datas);
                         if ($result) {
                             $redis->hSet($redis_key, $database['Database'] . '_' . $tableName, 1, 86400);
+                            var_dump($tableName);
                         }
                     }
 
