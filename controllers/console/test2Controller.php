@@ -6,6 +6,7 @@ use controllers\BaseController;
 use fky\classs\Config;
 use fky\classs\Db;
 use fky\classs\LoadFactory;
+use fky\classs\MqttServer;
 use fky\classs\Phpredis;
 
 /**
@@ -387,5 +388,29 @@ class Test2Controller extends BaseController
 //        var_dump($data);
         echo 'good';
         return true;
+    }
+
+    public function test4()
+    {
+        $mqtt = MqttServer::getInstance();
+        $mqtt->onPublish(function ($mid) {
+            loadc('log')->info('MQTT mid:'. $mid);
+            echo $mid;
+        });
+        $mqtt->onMessage(function ($message) {
+            $msg = "Receive Message From mqtt, topic is " . $message->topic . "  qos is " . $message->qos . "  messageId is " . $message->mid . "  payload is " . $message->payload . "\n";
+            loadc('log')->info('MQTT get:'. $msg);
+            echo $msg;
+        });
+
+        $mqtt->onConnect(function ($rc, $message) {
+            echo "Connnect to Server Code is " . $rc . " message is " . $message . "\n";
+        });
+
+        $mqtt->connect();
+        $mid = $mqtt->publish('yunlaba', 'haha good', 2);
+        $mqtt->loopForever();
+
+        echo 'good';
     }
 }
