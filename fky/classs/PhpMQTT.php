@@ -1,29 +1,39 @@
 <?php
 namespace fky\classs;
+require_once __DIR__.'/../inc/sskaje/Autoloader.php';
 use fky\classs\Config;
+
+use sskaje\mqtt\MQTT;
+use sskaje\mqtt\Debug;
+use sskaje\mqtt\MessageHandler;
+use sskaje\mqtt\Exception;
+use sskaje\mqtt\Message;
 
 /* phpMQTT */
 class PhpMQTT {
 
-	private $socket; 			/* holds the socket	*/
-	private $msgid = 1;			/* counter for message id */
-	public $keepalive = 10;		/* default keepalive timmer */
-	public $timesinceping;		/* host unix time, used to detect disconects */
-	public $topics = array(); 	/* used to store currently subscribed topics */
-	public $debug = false;		/* should output debug messages */
-	public $address;			/* broker address */
-	public $port;				/* broker port */
-	public $clientid;			/* client id sent to brocker */
-	public $will;				/* stores the will of the client */
-	private $username;			/* stores username */
-	private $password;			/* stores password */
-
-    public $cafile;
+    private $broker;
+    public $keepalive = 60; //在没有收到消息的情况下，服务器应该ping客户端的部分数量。
+    public $address;
+    public $port;
+    public $clientid;
+    private $username;
+    private $password;
 
     private static $_instance = [];
 
-    function __construct($address, $port, $clientid, $cafile = NULL, $username = NUll, $password = NULL){
-		$this->broker($address, $port, $clientid, $cafile, $username, $password);
+    public function __construct($address, $port, $clientid, $username = NUll, $password = NULL){
+        $this->address = $address;
+        $this->port = $port;
+        $this->clientid = $clientid;
+
+        if($username) $this->username = $username;
+        if($password) $this->password = $password;
+
+        $this->createClient($this->clientid);
+        if ($username && $password) {
+            $this->auth($username, $password);
+        }
 	}
 
     public static function getInstance($connectName = 'mqtt')
@@ -34,396 +44,130 @@ class PhpMQTT {
 
         if (!isset(self::$_instance[$connectName])) {
             $conf = Config::getInstance()->get($connectName, 'mqtt');
-            self::$_instance[$connectName] = new PhpMQTT($conf['host'], $conf['port'], $conf['client_id'], NULL, $conf['username'], $conf['password']);
+            self::$_instance[$connectName] = new PhpMQTT($conf['host'], $conf['port'], $conf['client_id'],  $conf['username'], $conf['password']);
         }
         return self::$_instance[$connectName];
     }
 
-	/* sets the broker details */
-	function broker($address, $port, $clientid, $cafile = NULL, $username = NUll, $password = NULL){
-		$this->address = $address;
-		$this->port = $port;
-		$this->clientid = $clientid;
-		$this->cafile = $cafile;
+    public function createClient($clientId = null, $cleanSession = true)
+    {
+        $this->broker = new MQTT($this->address.':'.$this->port, $clientId);
+        $context = stream_context_create();
+        $this->broker->setSocketContext($context);
+        $this->broker->setConnectClean($cleanSession);
+        $this->broker->setKeepalive($this->keepalive);
+    }
 
-        if($username) $this->username = $username;
-        if($password) $this->password = $password;
-	}
+    public function auth($username, $password)
+    {
+        $this->broker->setAuth($username, $password);
+    }
 
-	function connect_auto($clean = true, $will = NULL, $username = NULL, $password = NULL){
-		while($this->connect($clean, $will, $username, $password)==false){
-			sleep(10);
-		}
-		return true;
-	}
+    public function setConnectClean($cleanSession = false)
+    {
+        $this->broker->setConnectClean($cleanSession);
+    }
 
-	/* connects to the broker 
-		inputs: $clean: should the client send a clean session flag
-	*/
-	function connect($clean = true, $will = NULL, $username = NULL, $password = NULL){
-		
-		if($will) $this->will = $will;
-		if($username) $this->username = $username;
-		if($password) $this->password = $password;
+    public function setKeepalive($keepalive = 10)
+    {
+        $this->broker->setKeepalive($keepalive);
+    }
 
-		if ($this->cafile) {
-			$socketContext = stream_context_create(["ssl" => [
-				"verify_peer_name" => true,
-				"cafile" => $this->cafile
-				]]);
-			$this->socket = stream_socket_client("tls://" . $this->address . ":" . $this->port, $errno, $errstr, 60, STREAM_CLIENT_CONNECT, $socketContext);
-		} else {
-			$this->socket = stream_socket_client("tcp://" . $this->address . ":" . $this->port, $errno, $errstr, 60, STREAM_CLIENT_CONNECT);
-		}
+    public function setWill($topic, $message, $qos=0, $retain=0)
+    {
+        $this->broker->setWill($topic, $message, $qos, $retain);
+    }
 
-		if (!$this->socket ) {
-		    if($this->debug) error_log("stream_socket_create() $errno, $errstr \n");
-			return false;
-		}
-
-		stream_set_timeout($this->socket, 5);
-		stream_set_blocking($this->socket, 0);
-
-		$i = 0;
-		$buffer = "";
-
-		$buffer .= chr(0x00); $i++;
-		$buffer .= chr(0x06); $i++;
-		$buffer .= chr(0x4d); $i++;
-		$buffer .= chr(0x51); $i++;
-		$buffer .= chr(0x49); $i++;
-		$buffer .= chr(0x73); $i++;
-		$buffer .= chr(0x64); $i++;
-		$buffer .= chr(0x70); $i++;
-		$buffer .= chr(0x03); $i++;
-
-		//No Will
-		$var = 0;
-		if($clean) $var+=2;
-
-		//Add will info to header
-		if($this->will != NULL){
-			$var += 4; // Set will flag
-			$var += ($this->will['qos'] << 3); //Set will qos
-			if($this->will['retain'])	$var += 32; //Set will retain
-		}
-
-		if($this->username != NULL) $var += 128;	//Add username to header
-		if($this->password != NULL) $var += 64;	//Add password to header
-
-		$buffer .= chr($var); $i++;
-
-		//Keep alive
-		$buffer .= chr($this->keepalive >> 8); $i++;
-		$buffer .= chr($this->keepalive & 0xff); $i++;
-
-		$buffer .= $this->strwritestring($this->clientid,$i);
-
-		//Adding will to payload
-		if($this->will != NULL){
-			$buffer .= $this->strwritestring($this->will['topic'],$i);  
-			$buffer .= $this->strwritestring($this->will['content'],$i);
-		}
-
-		if($this->username) $buffer .= $this->strwritestring($this->username,$i);
-		if($this->password) $buffer .= $this->strwritestring($this->password,$i);
-
-		$head = "  ";
-		$head{0} = chr(0x10);
-		$head{1} = chr($i);
-
-		fwrite($this->socket, $head, 2);
-		fwrite($this->socket,  $buffer);
-
-	 	$string = $this->read(4);
-
-	 	if (empty($string)) {
-            throw new \Exception('WTFFFFFF!!!! ');
-            return false;
+    /**
+     * 设置回调。
+     * @param $callbackArr
+     * @throws \Exception
+     */
+    public function setCallback(array $callbackArr)
+    {
+        if (!is_array($callbackArr)) {
+            throw new Exception('回调函数设置错误！', 500);
         }
 
-		if(ord($string{0})>>4 == 2 && $string{3} == chr(0)){
-			if($this->debug) echo "Connected to Broker\n";
-		}else{
-			error_log(sprintf("Connection failed! (Error: 0x%02x 0x%02x)\n",
-			                        ord($string{0}),ord($string{3})));
-			return false;
-		}
+        foreach ($callbackArr as $callbackName => $callback) {
+            if(!is_callable($callback)){
+                throw new Exception('回调函数设置错误！', 500);
+            }
+        }
 
-		$this->timesinceping = time();
-
-		return true;
-	}
-
-	/* read: reads in so many bytes */
-	function read($int = 8192, $nb = false){
-		
-		$string="";
-		$togo = $int;
-		
-		if($nb){
-			return fread($this->socket, $togo);
-		}
-			
-		while (!feof($this->socket) && $togo>0) {
-			$fread = fread($this->socket, $togo);
-			$string .= $fread;
-			$togo = $int - strlen($string);
-		}
-
-		return $string;
-	}
+        $callbackHandler = new MqttCallback();
+        $callbackHandler->setCallback($callbackArr);
+        $this->broker->setHandler($callbackHandler);
+    }
 
     /**
-     * 订阅:订阅主题
-     * @param $topics  -订阅的主题数组 ['主题'=>array("qos" => 2, 'callback' => "回调函数格式1直接：function($topic, $msg){}，格式2类函数[$this, 'callback'], 格式3函数名字符串'callback'")]
-     * @param int $qos 消息质量
+     * 连接mqtt服务器
      */
-	function subscribe($topics, $qos = 0){
-		$i = 0;
-		$buffer = "";
-		$id = $this->msgid;
-		$buffer .= chr($id >> 8);  $i++;
-		$buffer .= chr($id % 256);  $i++;
+    public function connect()
+    {
+        return $this->broker->connect();
+    }
 
-		foreach($topics as $key => $topic){
-			$buffer .= $this->strwritestring($key,$i);
-			$buffer .= chr($topic["qos"]);  $i++;
-			$this->topics[$key] = $topic; 
-		}
-
-		$cmd = 0x80;
-		//$qos
-		$cmd +=	($qos << 1);
-
-
-		$head = chr($cmd);
-		$head .= chr($i);
-		
-		fwrite($this->socket, $head, 2);
-		fwrite($this->socket, $buffer, $i);
-		$string = $this->read(2);
-		
-		$bytes = ord(substr($string,1,1));
-		$string = $this->read($bytes);
-	}
-
-	/* ping: sends a keep alive ping */
-	function ping(){
-			$head = " ";
-			$head = chr(0xc0);		
-			$head .= chr(0x00);
-			fwrite($this->socket, $head, 2);
-			if($this->debug) echo "ping sent\n";
-	}
-
-	/* disconnect: sends a proper disconect cmd */
-	function disconnect(){
-			$head = " ";
-			$head{0} = chr(0xe0);		
-			$head{1} = chr(0x00);
-			@fwrite($this->socket, $head, 2);
-	}
-
-	/* close: sends a proper disconect, then closes the socket */
-	function close(){
-	 	$this->disconnect();
-		stream_socket_shutdown($this->socket, STREAM_SHUT_WR);	
-	}
+    public function reconnect($close_current=true)
+    {
+        return $this->broker->reconnect($close_current);
+    }
 
     /**
-     * 发布:在主题上发布内容
-     * @param $topic -主题名称
-     * @param $content -消息内容
-     * @param int $qos -消息质量
-     * @param int $retain -是否保留此消息
+     * Disconnect connection
+     *
+     * @return bool
      */
-	function publish($topic, $content, $qos = 0, $retain = 0){
-
-		$i = 0;
-		$buffer = "";
-
-		$buffer .= $this->strwritestring($topic,$i);
-
-		//$buffer .= $this->strwritestring($content,$i);
-
-		if($qos){
-			$id = $this->msgid++;
-			$buffer .= chr($id >> 8);  $i++;
-		 	$buffer .= chr($id % 256);  $i++;
-		}
-
-		$buffer .= $content;
-		$i+=strlen($content);
-
-
-		$head = " ";
-		$cmd = 0x30;
-		if($qos) $cmd += $qos << 1;
-		if($retain) $cmd += 1;
-
-		$head{0} = chr($cmd);		
-		$head .= $this->setmsglength($i);
-
-		fwrite($this->socket, $head, strlen($head));
-		fwrite($this->socket, $buffer, $i);
-
-	}
+    public function disconnect()
+    {
+        return $this->broker->disconnect();
+    }
 
     /**
-     * 消息:处理接收到的主题消息
-     * @param $msg -消息
+     * @param array $topics ['topics' => qos]
+     * @return mixed
      */
-	function message($msg){
-		 	$tlen = (ord($msg{0})<<8) + ord($msg{1});
-			$topic = substr($msg,2,$tlen);
-			$msg = substr($msg,($tlen+2));
-			$found = 0;
-			foreach($this->topics as $key=>$top){
-				if( preg_match("/^".str_replace("#",".*",
-						str_replace("+","[^\/]*",
-							str_replace("/","\/",
-								str_replace("$",'\$',
-									$key))))."$/",$topic) ){
-					if(is_callable($top['callback'])){
-                        if (is_object($top['callback'])) { //函数对象，直接调用
-                            $callback = $top['callback'];
-                            $callback($topic,$msg);
-                        } else {
-                            call_user_func($top['callback'],$topic,$msg);
-                        }
-						$found = 1;
-					}
-				}
-			}
+    public function subscribe(array $topics)
+    {
+        return $this->broker->subscribe($topics);
+    }
 
-			if($this->debug && !$found) echo "msg recieved but no match in subscriptions\n";
-	}
+    public function unsubscribe(array $topics)
+    {
+        return $this->broker->unsubscribe($topics);
+    }
 
-	/* proc: the processing loop for an "allways on" client 
-		set true when you are doing other stuff in the loop good for watching something else at the same time */	
-	function proc( $loop = true){
+    public function publish($topic, $message, $qos=0, $retain=0, &$msgid=null)
+    {
+        return $this->broker->publish_async($topic, $message, $qos, $retain, $msgid);
+    }
 
-		if(1){
-			$sockets = array($this->socket);
-			$w = $e = NULL;
-			$cmd = 0;
-			
-				//$byte = fgetc($this->socket);
-			if(feof($this->socket)){ //检测指针是否到数据末尾，到达则重新连接
-				if($this->debug) echo "eof receive going to reconnect for good measure\n";
-				fclose($this->socket);
-				$this->connect_auto(false);
-				if(count($this->topics))
-					$this->subscribe($this->topics);	
-			}
-			
-			$byte = $this->read(1, true);
-			
-			if(!strlen($byte)){
-				if($loop){
-					usleep(100000);
-				}
-			 
-			}else{ 
-			
-				$cmd = (int)(ord($byte)/16);
-				if($this->debug) echo "Recevid: $cmd\n";
+    public function setHandler(MessageHandler $handler)
+    {
+        $this->broker->setHandler($handler);
+    }
 
-				$multiplier = 1; 
-				$value = 0;
-				do{
-					$digit = ord($this->read(1));
-					$value += ($digit & 127) * $multiplier; 
-					$multiplier *= 128;
-					}while (($digit & 128) != 0);
+    /**
+     * 保持客户端连接
+     */
+    public function loop()
+    {
+        $this->broker->loop();
+    }
 
-				if($this->debug) echo "Fetching: $value\n";
+    public function exitLoop()
+    {
+        $this->broker->exitLoop();
+    }
 
-				if($value)
-					$string = $this->read($value);
-
-				if($cmd){
-					switch($cmd){
-						case 3:
-							$this->message($string);
-						break;
-					}
-
-					$this->timesinceping = time();
-				}
-			}
-
-			if($this->timesinceping < (time() - $this->keepalive )){
-				if($this->debug) echo "not found something so ping\n";
-				$this->ping();	
-			}
-			
-
-			if($this->timesinceping<(time()-($this->keepalive*2))){
-				if($this->debug) echo "not seen a package in a while, disconnecting\n";
-				fclose($this->socket);
-				$this->connect_auto(false);
-				if(count($this->topics))
-					$this->subscribe($this->topics);
-			}
-
-		}
-		return 1;
-	}
-
-	/* getmsglength: */
-	function getmsglength(&$msg, &$i){
-
-		$multiplier = 1; 
-		$value = 0 ;
-		do{
-		  $digit = ord($msg{$i});
-		  $value += ($digit & 127) * $multiplier; 
-		  $multiplier *= 128;
-		  $i++;
-		}while (($digit & 128) != 0);
-
-		return $value;
-	}
-
-
-	/* setmsglength: */
-	function setmsglength($len){
-		$string = "";
-		do{
-		  $digit = $len % 128;
-		  $len = $len >> 7;
-		  // if there are more digits to encode, set the top bit of this digit
-		  if ( $len > 0 )
-		    $digit = ($digit | 0x80);
-		  $string .= chr($digit);
-		}while ( $len > 0 );
-		return $string;
-	}
-
-	/* strwritestring: writes a string to a buffer */
-	function strwritestring($str, &$i){
-		$ret = " ";
-		$len = strlen($str);
-		$msb = $len >> 8;
-		$lsb = $len % 256;
-		$ret = chr($msb);
-		$ret .= chr($lsb);
-		$ret .= $str;
-		$i += ($len+2);
-		return $ret;
-	}
-
-	function printstr($string){
-		$strlen = strlen($string);
-			for($j=0;$j<$strlen;$j++){
-				$num = ord($string{$j});
-				if($num > 31) 
-					$chr = $string{$j}; else $chr = " ";
-				printf("%4d: %08b : 0x%02x : %s \n",$j,$num,$num,$chr);
-			}
-	}
+    /**
+     * 获取客户端实例
+     * @return mixed
+     */
+    public function getBroker()
+    {
+        return $this->broker;
+    }
 
     /**
      * 生成MQTT账号密码
@@ -441,5 +185,112 @@ class PhpMQTT {
         $password = base64_encode($sigStr);
 
         return ['clientId' => $clientId,'username' => $username, 'password' => $password];
+    }
+}
+
+
+class MqttCallback extends MessageHandler
+{
+    private $callback = [];
+    public function __construct(){
+    }
+
+    public function setCallback($callbackArr)
+    {
+        if (!is_array($callbackArr)) {
+            throw new Exception('回调函数设置错误！', 500);
+        }
+
+        foreach ($callbackArr as $callbackName => $callback) {
+            if(!is_callable($callback)){
+                throw new Exception('回调函数设置错误！', 500);
+            }
+        }
+
+        $this->callback = $callbackArr;
+    }
+
+    //设置消息回调
+    public function publish(MQTT $mqtt, Message\PUBLISH $publish_object)
+    {
+//        printf(
+//            "\e[32mI got a message\e[0m:(msgid=%d, QoS=%d, dup=%d, topic=%s) \e[32m%s\e[0m\n",
+//            $publish_object->getMsgID(),
+//            $publish_object->getQoS(),
+//            $publish_object->getDup(),
+//            $publish_object->getTopic(),
+//            $publish_object->getMessage()
+//        );
+
+        if(isset($this->callback['message']) && is_callable($this->callback['message'])){
+            if (is_object($this->callback['message'])) { //函数对象，直接调用
+                $callback = $this->callback['message'];
+                $callback($publish_object->getTopic(),$publish_object->getMessage(),$publish_object->getMsgID(),$publish_object->getQoS(),$mqtt);
+            } else {
+                call_user_func($this->callback['message'],$publish_object->getTopic(),$publish_object->getMessage(),$publish_object->getMsgID(),$publish_object->getQoS(),$mqtt);
+            }
+        }
+    }
+
+
+    public function connack(MQTT $mqtt, Message\CONNACK $connack_object)
+    {
+        if(isset($this->callback['connect']) && is_callable($this->callback['connect'])){
+            if (is_object($this->callback['connect'])) { //函数对象，直接调用
+                $callback = $this->callback['connect'];
+                $callback($connack_object->getMsgID(),$mqtt);
+            } else {
+                call_user_func($this->callback['connect'],$connack_object->getMsgID(),$mqtt);
+            }
+        }
+    }
+
+    public function disconnect(MQTT $mqtt)
+    {
+        if(isset($this->callback['disconnect']) && is_callable($this->callback['disconnect'])){
+            if (is_object($this->callback['disconnect'])) { //函数对象，直接调用
+                $callback = $this->callback['disconnect'];
+                $callback($mqtt);
+            } else {
+                call_user_func($this->callback['disconnect'],$mqtt);
+            }
+        }
+    }
+
+    public function suback(MQTT $mqtt, Message\SUBACK $suback_object)
+    {
+        if(isset($this->callback['subscribe']) && is_callable($this->callback['subscribe'])){
+            if (is_object($this->callback['subscribe'])) { //函数对象，直接调用
+                $callback = $this->callback['subscribe'];
+                $callback($suback_object->getReturnCodes(),$mqtt);
+            } else {
+                call_user_func($this->callback['subscribe'],$suback_object->getReturnCodes(),$mqtt);
+            }
+        }
+    }
+
+    public function unsuback(MQTT $mqtt, Message\UNSUBACK $unsuback_object)
+    {
+        if(isset($this->callback['unsubscribe']) && is_callable($this->callback['unsubscribe'])){
+            if (is_object($this->callback['unsubscribe'])) { //函数对象，直接调用
+                $callback = $this->callback['unsubscribe'];
+                $callback($unsuback_object->getMsgID(),$mqtt);
+            } else {
+                call_user_func($this->callback['unsubscribe'],$unsuback_object->getMsgID(),$mqtt);
+            }
+        }
+    }
+
+    public function pubcomp(MQTT $mqtt, Message\PUBCOMP $pubcomp_object)
+    {
+        if(isset($this->callback['publish']) && is_callable($this->callback['publish'])){
+            if (is_object($this->callback['publish'])) { //函数对象，直接调用
+                $callback = $this->callback['publish'];
+                $callback($pubcomp_object->getMsgID(),$mqtt);
+            } else {
+                call_user_func($this->callback['publish'],$pubcomp_object->getMsgID(),$mqtt);
+            }
+        }
+
     }
 }

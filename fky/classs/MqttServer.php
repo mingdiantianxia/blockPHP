@@ -96,7 +96,7 @@ class MqttServer
     {
         //不是函数对象
         if(!is_callable($callback) || !is_object($callback)){
-            return false;
+            throw new Exception('回调函数设置错误！', 500);
         }
         $this->broker->onConnect($callback);
     }
@@ -110,7 +110,7 @@ class MqttServer
     {
         //不是函数对象
         if(!is_callable($callback) || !is_object($callback)){
-            return false;
+            throw new Exception('回调函数设置错误！', 500);
         }
         $this->broker->onDisconnect($callback);
     }
@@ -130,7 +130,7 @@ class MqttServer
     {
         //不是函数对象
         if(!is_callable($callback) || !is_object($callback)){
-            return false;
+            throw new Exception('回调函数设置错误！', 500);
         }
         $this->broker->onLog($callback);
     }
@@ -144,7 +144,7 @@ class MqttServer
     {
         //不是函数对象
         if(!is_callable($callback) || !is_object($callback)){
-            return false;
+            throw new Exception('回调函数设置错误！', 500);
         }
         $this->broker->onSubscribe($callback);
     }
@@ -158,13 +158,13 @@ class MqttServer
     {
         //不是函数对象
         if(!is_callable($callback) || !is_object($callback)){
-            return false;
+            throw new Exception('回调函数设置错误！', 500);
         }
         $this->broker->onUnsubscribe($callback);
     }
 
     /**
-     * 设置消息回调。收到从服务器返回的消息时调用。，必须loopForever()持续连接，才能接收回调
+     * 设置消息回调。收到从服务器返回的消息时调用,处理订阅的消息和点到点消息。，必须loopForever()持续连接，才能接收回调
      * @param $callback(callable)– 回调函数 function($message){} $message消息对象 主题$message->topic 质量$message->qos 消息ID:$message->mid 内容$message->payload 等
      * @return bool
      */
@@ -172,7 +172,7 @@ class MqttServer
     {
         //不是函数对象
         if(!is_callable($callback) || !is_object($callback)){
-            return false;
+            throw new Exception('回调函数设置错误！', 500);
         }
         $this->broker->onMessage($callback);
     }
@@ -187,7 +187,7 @@ class MqttServer
     {
         //不是函数对象
         if(!is_callable($callback) || !is_object($callback)){
-            return false;
+            throw new Exception('回调函数设置错误！', 500);
         }
         $this->broker->onPublish($callback);
     }
@@ -205,7 +205,7 @@ class MqttServer
      */
     public function disconnect()
     {
-        return $this->broker->disconnect();
+        $this->broker->disconnect();
     }
 
     /**
@@ -252,9 +252,9 @@ class MqttServer
     public function loop($timeout = null)
     {
         if ($timeout) {
-            return $this->broker->loop($timeout);
+            $this->broker->loop($timeout);
         } else {
-            return $this->broker->loop();
+            $this->broker->loop();
         }
     }
 
@@ -267,9 +267,9 @@ class MqttServer
     public function loopForever($timeout = null)
     {
         if ($timeout) {
-            return $this->broker->loopForever($timeout);
+            $this->broker->loopForever($timeout);
         } else {
-            return $this->broker->loopForever();
+            $this->broker->loopForever();
         }
     }
 
@@ -279,7 +279,7 @@ class MqttServer
      */
     public function exitLoop()
     {
-        return $this->broker->exitLoop();
+        $this->broker->exitLoop();
     }
 
     /**

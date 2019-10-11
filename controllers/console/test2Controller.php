@@ -1,12 +1,12 @@
 <?php
 
 namespace controllers\console;
-
 use controllers\BaseController;
 use fky\classs\Config;
 use fky\classs\Db;
 use fky\classs\LoadFactory;
 use fky\classs\MqttServer;
+use fky\classs\PhpMQTT;
 use fky\classs\Phpredis;
 
 /**
@@ -397,9 +397,15 @@ class Test2Controller extends BaseController
             loadc('log')->info('MQTT mid:'. $mid);
             echo $mid;
         });
-        $mqtt->onMessage(function ($message) {
+        $mqtt->onMessage(function ($message) use ($mqtt) {
             $msg = "Receive Message From mqtt, topic is " . $message->topic . "  qos is " . $message->qos . "  messageId is " . $message->mid . "  payload is " . $message->payload . "\n";
             loadc('log')->info('MQTT get:'. $msg);
+            echo $msg;
+        });
+
+        $mqtt->onSubscribe(function ($mid,$qosCount) use ($mqtt) {
+            $msg = "Receive Subscribe From mqtt, mid is " . $mid . "  qosCount is " . $qosCount . "\n";
+            loadc('log')->info('MQTT Sub:'. $msg);
             echo $msg;
         });
 
@@ -408,9 +414,61 @@ class Test2Controller extends BaseController
         });
 
         $mqtt->connect();
-        $mid = $mqtt->publish('yunlaba', 'haha good', 2);
+        $mqtt->subscribe('yunlaba', 2);
+        $mid = $mqtt->publish('yunlaba', 'mqtt test', 2);
         $mqtt->loopForever();
 
         echo 'good';
+    }
+
+    public function test5()
+    {
+        $mqtt = PhpMQTT::getInstance();
+        $mqtt->setWill('yunlaba','bbbb',2);
+        $mqtt->setCallback([
+            'connect' => function($mid,$mqtt){
+                echo "connect : " . date("r") . "\n";
+                echo "mid: {$mid}\n\n";
+            },
+            'disconnect' => function($mqtt){
+                echo "disconnect : " . date("r") . "\n";
+            },
+            'subscribe' => function($codes, $mqtt) {
+                echo "subscribe : " . date("r") . "\n";
+                var_dump($codes);
+                echo " \n\n";
+            },
+            'message' => function ($topic, $msg, $mid, $qos) use ($mqtt) {
+                loadc('log')->info('phpMQTT get:' . $topic . ':' . $msg);
+
+                echo "Msg Recieved: " . date("r") . "\n";
+                echo "Topic: {$topic}\n\n";
+                echo "\t$msg\n\n";
+                $mqtt->exitLoop();
+                $mqtt->disconnect();
+            },
+            'publish' => function($mid,$mqtt){
+                echo "Msg publish: " . date("r") . "\n";
+                echo "mid: {$mid}\n\n";
+            },
+        ]);
+        if ($mqtt->connect()) {
+            $topics['yunlaba'] = 2;
+            $mqtt->subscribe($topics);
+            $mqtt->publish("yunlaba", 'phpMQTT test', 2);
+            $mqtt->loop();
+        } else {
+            echo "Time out!\n";
+        }
+        die('good');
+    }
+
+    function mqttcallback($topic, $msg)
+    {
+        loadc('log')->info('phpMQTT get:'. $topic .':'. $msg);
+
+        echo "Msg Recieved: " . date("r") . "\n";
+        echo "Topic: {$topic}\n\n";
+        echo "\t$msg\n\n";
     }
 }
