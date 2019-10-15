@@ -1,12 +1,11 @@
 <?php
-namespace fky\classs;
-use fky\classs\MessageServer;
+namespace fky\classs\worker\test;
 use Swoole\Process;
 use Swoole\Timer;
 /**
  * Worker server, 主要用于管理和维护worker进程
  */
-class WorkerServer
+class WorkerServerTest
 {
     /**
      * 当前实例
@@ -50,12 +49,12 @@ class WorkerServer
      * 子进程都退出后，主进程是否退出
      * @var bool
      */
-    private $_MasterProcessExit = false;
+    private $_MasterProcessExit = true;
 
     private function __construct()
     {
         $this->_log("start worker server...");
-        $this->_conf = loadc('config')->get("", "worker");
+        $this->_conf = loadc('config')->get("", "worker_test");
 
         //masker进程注册相关信号处理
         Process::signal(SIGCHLD, [$this, 'doSignal']);
@@ -67,9 +66,6 @@ class WorkerServer
             Process::daemon();
             file_put_contents($this->_conf['pid'], posix_getpid());
         }
-
-        //初始化worker队列
-        $this->_initWorkerMessageQueue();
     }
 
     /**
@@ -79,7 +75,7 @@ class WorkerServer
     public static function getInstance()
     {
         if (self::$_instance == null) {
-            self::$_instance = new WorkerServer();
+            self::$_instance = new WorkerServerTest();
         }
         return self::$_instance;
     }
@@ -91,8 +87,8 @@ class WorkerServer
     {
         $this->startWorker();
 
-        //监控worker进程 (5分钟后触发回调函数)
-        Timer::after(5*60*1000, function () {
+        //监控worker进程 (10秒后触发回调函数)
+        Timer::after(10*1000, function () {
             //每秒执行一次worker
             $this->_monitorTimerId = Timer::tick(1000, function () {
                 $this->startWorker();
@@ -116,22 +112,6 @@ class WorkerServer
                 continue;
             }
 
-            //控制测试环境的进程数
-            if (in_array(loadc('config')->get("env"), ['dev'])) {
-                $jWorkers = 0;
-                if (isset($this->_queueWorkers[$jobName])) {
-                    $jWorkers = $this->_queueWorkers[$jobName];
-                }
-                else {
-                    $this->_queueWorkers[$jobName] = 1;
-                }
-                if ($jWorkers > 0) {
-                    continue;
-                }
-                //默认启动一个进程用于测试
-                $conf['threadNum'] = 1;
-            }
-
             //该队列目前有多少个worker进程在执行
             $workers = $this->_getWorkers($jobName);
             if ($workers >= $conf['threadNum']) {
@@ -147,7 +127,7 @@ class WorkerServer
 
                     //执行脚本，传递t参数(值为队列名)，处理队列
                     $cmd = $this->_conf['php'];
-                    $worker->exec($cmd,  ['worker.php', '-t', $jobName]);
+                    $worker->exec($cmd,  ['workerTest.php', '-t', $jobName]);
                 },false, false);
 
                 $pid = $workerProcess->start();
@@ -177,7 +157,7 @@ class WorkerServer
                 }
 
                 if ($this->_MasterProcessExit && $this->_getTotalWorkers() == 0) {
-                    //当子进程都退出后，结束masker进程
+                    //收到主进程退出信号，当子进程都退出后，结束master进程
                     @unlink($this->_conf['pid']);
                     exit(0);
                 }
@@ -188,7 +168,7 @@ class WorkerServer
                 if ($this->_monitorTimerId) {
                     Timer::clear($this->_monitorTimerId);
                 }
-                //主进程退出信号标记（子进程都退出，则主进程退出）
+                //主进程退出信号标记
                 $this->_MasterProcessExit = true;
                 if (!empty($this->_pidMapToWorkerType)) {
                     $this->_log("worker server shutdown...");
@@ -197,38 +177,6 @@ class WorkerServer
                     }
                 }
                 break;
-        }
-    }
-
-    /**
-     * 初始化消息队列
-     */
-    private function _initWorkerMessageQueue()
-    {
-        if (empty($this->_conf)) {
-            return;
-        }
-
-        $messageServer = MessageServer::getInstance();
-        foreach ($this->_conf['workerConf'] as $jobName => $workerConfig) {
-            //获取根据环境拼接后的队列名称
-            $queueName = $messageServer->getQueueNameByJobName($jobName);
-            if (empty($queueName)) {
-                $this->_log("creare worker message queue failure, get queue name failure. queueName={$queueName}");
-                continue;
-            }
-
-            //创建队列（不存在则创建，存在则返回true）
-            $ret = $messageServer->createQueue($queueName);
-            if (!$ret) {
-                $this->_log("creare worker message queue failure. queueName={$queueName}");
-            }
-
-            //worker获取消息后，多长时间内其他worker不能消费同一条消息，单位秒，最长12小时内
-            if (isset($workerConfig['visibilityTimeout'])) {
-                //设置队列属性
-                $messageServer->setQueueAttributes($queueName, $workerConfig['visibilityTimeout']);
-            }
         }
     }
 

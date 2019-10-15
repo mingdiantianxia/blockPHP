@@ -438,7 +438,7 @@ class Test2Controller extends BaseController
                 var_dump($codes);
                 echo " \n\n";
             },
-            'message' => function ($topic, $msg, $mid, $qos) use ($mqtt) {
+            'message' => function ($topic, $msg, $mid, $qos,$mqtt){
                 loadc('log')->info('phpMQTT get:' . $topic . ':' . $msg);
 
                 echo "Msg Recieved: " . date("r") . "\n";
@@ -470,5 +470,13 @@ class Test2Controller extends BaseController
         echo "Msg Recieved: " . date("r") . "\n";
         echo "Topic: {$topic}\n\n";
         echo "\t$msg\n\n";
+    }
+
+    public function flushRedis()
+    {
+        $redis = Phpredis::getInstance();
+        $redis =$redis->getOriginInstance();
+        $redis->flushall();
+        die('good');
     }
 }
