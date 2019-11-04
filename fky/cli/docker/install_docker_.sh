@@ -16,5 +16,8 @@ sudo yum -y install docker-ce docker-ce-cli containerd.io
 # 在dockerd后面加参数
 echo "ExecStart=/usr/bin/dockerd --registry-mirror=https://registry.docker-cn.com" >> /usr/lib/systemd/system/docker.service
 
+#重新载入 systemd，扫描新的或有变动的单元
+sudo systemctl daemon-reload
+
 # 重启docker
 sudo service docker restart

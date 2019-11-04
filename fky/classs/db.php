@@ -11,6 +11,9 @@ class Db extends \Medoo\Medoo
     private static $_instance = [];
 
 	public function __construct($options = null){
+	    if (!is_array($options) || !isset($options['server']) || !isset($options['username']) || empty($options['server']) || empty($options['username'])) {
+	        return false;
+        }
 		parent::__construct($options);
 	}
 

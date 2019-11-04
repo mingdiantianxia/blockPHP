@@ -1,0 +1,147 @@
+FROM php:5.6-fpm
+
+#把本地目录conf的所有文件复制到工作目录
+COPY conf/ /data/workerspace/
+
+#设置工作目录
+WORKDIR /data/workerspace
+
+#使用apt-get安装依赖时并非静默安装，需要交互，所以无法正常通过
+ENV DEBIAN_FRONTEND noninteractive
+
+#执行shell命令，不能有空行（包括注释行）
+RUN set -x \
+    #修改镜像源为阿里源
+    && cp -f ./sources.list /etc/apt/sources.list \
+    && apt-get update && apt-get install -y --no-install-recommends apt-utils \
+    #php扩展相关依赖库
+    && apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev libmcrypt-dev \
+    #git
+#    && apt-get install -y git \
+    #安装ps和top命令
+    && apt-get install -y procps \
+
+    #安装php扩展,nproc系统限制的最大进程数，-j$(nproc)使用最大进程数编译安装
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-configure pcntl \
+    && docker-php-ext-install -j$(nproc) pcntl \
+    && docker-php-ext-configure pdo_mysql \
+    && docker-php-ext-install -j$(nproc) pdo_mysql \
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install -j$(nproc) zip \
+    && docker-php-ext-configure opcache \
+    && docker-php-ext-install -j$(nproc) opcache \
+    && docker-php-ext-configure bcmath \
+    && docker-php-ext-install -j$(nproc) bcmath \
+    && docker-php-ext-configure calendar \
+    && docker-php-ext-install -j$(nproc) calendar \
+    && docker-php-ext-configure mcrypt \
+    && docker-php-ext-install -j$(nproc) mcrypt \
+    && docker-php-ext-configure mysqli \
+    && docker-php-ext-install -j$(nproc) mysqli \
+    && docker-php-ext-configure sockets \
+    && docker-php-ext-install -j$(nproc) sockets \
+
+    #redis扩展
+#    && curl -s "http://pecl.php.net/get/redis-4.3.0.tgz" > redis-4.3.0.tgz \
+    && tar -zxvf redis-4.3.0.tgz \
+    #可以接受绝对路径
+    && docker-php-ext-configure $(pwd)/redis-4.3.0 \
+    && docker-php-ext-install $(pwd)/redis-4.3.0 \
+
+    #mongodb扩展
+    && pecl install http://pecl.php.net/get/mongodb-1.5.3.tgz \
+    && docker-php-ext-enable mongodb \
+
+    #安装mqtt依赖库
+    && apt-get install -y libmosquitto-dev \
+    #安装mqtt扩展
+    && ln -s /usr/lib/x86_64-linux-gnu/libmosquitto.so.1 /usr/lib/libmosquitto.so.1 \
+#    && curl -s "http://pecl.php.net/get/Mosquitto-0.4.0.tgz" > Mosquitto-0.4.0.tgz \
+    && tar -zxvf Mosquitto-0.4.0.tgz \
+    && docker-php-ext-configure $(pwd)/Mosquitto-0.4.0 \
+    && docker-php-ext-install $(pwd)/Mosquitto-0.4.0 \
+
+    #安装hiredis库，用于支持swoole异步redis客户端功能
+#    && curl -s "https://codeload.github.com/redis/hiredis/tar.gz/v0.13.3" > hiredis-0.13.3.tar.gz \
+    && tar -zxvf hiredis-0.13.3.tar.gz \
+    && cd hiredis-0.13.3 \
+    && make -j$(nproc) && make install && ldconfig \
+    && cd - \
+
+    #安装swoole扩展
+#    && curl -s "http://pecl.php.net/get/swoole-1.9.23.tgz" > swoole-1.9.23.tgz \
+    && tar -zxvf swoole-1.9.23.tgz \
+    #启用异步redis客户端功能
+    && docker-php-ext-configure $(pwd)/swoole-1.9.23 --enable-async-redis \
+    && docker-php-ext-install $(pwd)/swoole-1.9.23 \
+
+
+    #安装kafka依赖库, librdkafka-dev的版本在此dockerfile建立时是0.9.3，因此rdkafka只能安装到3.1.2，版本4.0.0需要0.11.0以上的库
+    && apt-get install -y python librdkafka-dev \
+    #kafka扩展
+    && pecl install rdkafka-3.1.2 \
+    && docker-php-ext-enable rdkafka \
+
+
+    #安装memcached扩展
+    && apt-get install -y libmemcached-dev \
+#    && curl -s "http://pecl.php.net/get/memcached-2.2.0.tgz" > memcached-2.2.0.tgz \
+    && tar -zxvf memcached-2.2.0.tgz \
+    && docker-php-ext-configure $(pwd)/memcached-2.2.0 \
+    && docker-php-ext-install $(pwd)/memcached-2.2.0 \
+
+
+    #下载解压tengine(nginx)的相关依赖
+    && apt-get install -y libssl-dev \
+#    && curl -s "http://www.zlib.net/zlib-1.2.11.tar.gz" > zlib-1.2.11.tar.gz \
+    && tar -zxvf zlib-1.2.11.tar.gz \
+#    && curl -s "https://ftp.pcre.org/pub/pcre/pcre-8.12.tar.gz" > pcre-8.12.tar.gz \
+    && tar -zxvf pcre-8.12.tar.gz \
+
+    #安装tengine(nginx)
+#    && curl -s "http://tengine.taobao.org/download/tengine-2.2.3.tar.gz" > tengine-2.2.3.tar.gz \
+    && tar -zxvf tengine-2.2.3.tar.gz \
+    && cd tengine-2.2.3 \
+    && ./configure --prefix=/data/server/nginx/ --with-http_ssl_module --with-pcre=../pcre-8.12 --with-zlib=../zlib-1.2.11 \
+    && make -j$(nproc) && make install \
+    && cd - \
+
+    && apt-get clean && cd /data/ \
+    #linux系统优化配置
+    && cp -f /data/workerspace/sysctl.conf /etc/sysctl.conf \
+
+    #创建www用户和用户组
+    && groupadd www && useradd -M -g www www \
+    #替换PHP设置文件
+    && cp -f /data/workerspace/php/php.ini /usr/local/etc/php/php.ini \
+    #替换php-fpm设置文件
+    && cp -f /data/workerspace/php/php-fpm.conf /usr/local/etc/php-fpm.conf \
+
+    #创建项目根目录，设置所属用户
+    && mkdir -p /data/wwwroot/www/ \
+    && chown -R www:www /data/wwwroot/www/ \
+    && mkdir -p /data/wwwlogs/nginx/ \
+    && chown -R www:www /data/wwwlogs/nginx/ \
+
+    #替换Nginx配置文件
+    && cp -f /data/workerspace/nginx/nginx.conf /data/server/nginx/conf/nginx.conf \
+    #复制php-fpm Nginx 服务启动脚本到server目录，并设置权限
+    && cp /data/workerspace/start.sh /data/server/ \
+    && chmod u+x /data/server/start.sh \
+    #创建Nginx虚拟主机配置目录
+    && mkdir -p /data/server/nginx/conf/vhost/ \
+
+    #设置一个测试虚拟主机
+    && cp /data/workerspace/nginx/default.conf /data/server/nginx/conf/vhost/ \
+    && echo "<?php echo \"fky env.\";" > /data/wwwroot/www/index.php \
+    #删除工作目录
+    && rm -rf /data/workerspace \
+    && rm -rf /tmp/pecl
+
+# 允许指定的端口
+EXPOSE 80/tcp 443/tcp 9000/tcp
+
+#容器启动命令
+CMD ["/data/server/start.sh"]

@@ -1,19 +1,18 @@
 <?php 
 return [
-    'env' => 'dev',//环境名
+    'env' => 'dev',//环境名 dev开发，test测试，prod正式
 
     'db'=> [
             'database_type' => 'mysql',
             'database_name' => 'test',
-            'server' => 'localhost',
-            'username' => 'root',
-            'password' => '',
-//            'password' => '123456',
+//            'server' => 'localhost',
+//            'username' => 'root',
+            'password' => '123456',
             'charset' => 'utf8',
              // 可选参数
             'port' => 3306,
             // 可选，定义表的前缀
-             'prefix' => 'wx_',
+             'prefix' => '',
         ],
         
     'redis' => [
@@ -22,7 +21,8 @@ return [
             //redis端口
             'port'  => '6379',
             //redis密码
-            'password' => '',
+            'password' => '123456',
+//            'password' => '',
             //连接超时
             'timeout' => 3,
             //持久化链接

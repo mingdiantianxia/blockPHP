@@ -1,5 +1,6 @@
 {
     "require": {
-        "elasticsearch/elasticsearch": "~5.0"
+        "elasticsearch/elasticsearch": "~5.0",
+        "monolog/monolog": "~1.0"
     }
 }

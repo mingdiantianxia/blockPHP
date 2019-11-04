@@ -1,0 +1,90 @@
+FROM php:5.6-fpm
+
+#把本地目录conf的所有文件复制到工作目录
+COPY conf/ /data/workerspace/
+
+#设置工作目录
+WORKDIR /data/workerspace
+
+#使用apt-get安装依赖时并非静默安装，需要交互，所以无法正常通过
+ENV DEBIAN_FRONTEND noninteractive
+
+#执行shell命令，不能有空行（包括注释行）
+RUN set -x \
+    && cp -f ./sources.list /etc/apt/sources.list \
+    && apt-get update && apt-get install -y --no-install-recommends apt-utils \
+    && apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev libmcrypt-dev \
+    && apt-get install -y procps \
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-configure pcntl \
+    && docker-php-ext-install -j$(nproc) pcntl \
+    && docker-php-ext-configure pdo_mysql \
+    && docker-php-ext-install -j$(nproc) pdo_mysql \
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install -j$(nproc) zip \
+    && docker-php-ext-configure opcache \
+    && docker-php-ext-install -j$(nproc) opcache \
+    && docker-php-ext-configure bcmath \
+    && docker-php-ext-install -j$(nproc) bcmath \
+    && docker-php-ext-configure calendar \
+    && docker-php-ext-install -j$(nproc) calendar \
+    && docker-php-ext-configure mcrypt \
+    && docker-php-ext-install -j$(nproc) mcrypt \
+    && docker-php-ext-configure mysqli \
+    && docker-php-ext-install -j$(nproc) mysqli \
+    && docker-php-ext-configure sockets \
+    && docker-php-ext-install -j$(nproc) sockets \
+    && tar -zxvf redis-4.3.0.tgz \
+    && docker-php-ext-configure $(pwd)/redis-4.3.0 \
+    && docker-php-ext-install $(pwd)/redis-4.3.0 \
+    && pecl install http://pecl.php.net/get/mongodb-1.5.3.tgz \
+    && docker-php-ext-enable mongodb \
+    && apt-get install -y libmosquitto-dev \
+    && ln -s /usr/lib/x86_64-linux-gnu/libmosquitto.so.1 /usr/lib/libmosquitto.so.1 \
+    && tar -zxvf Mosquitto-0.4.0.tgz \
+    && docker-php-ext-configure $(pwd)/Mosquitto-0.4.0 \
+    && docker-php-ext-install $(pwd)/Mosquitto-0.4.0 \
+    && tar -zxvf hiredis-0.13.3.tar.gz \
+    && cd hiredis-0.13.3 \
+    && make -j$(nproc) && make install && ldconfig \
+    && cd - \
+    && tar -zxvf swoole-1.9.23.tgz \
+    && docker-php-ext-configure $(pwd)/swoole-1.9.23 --enable-async-redis \
+    && docker-php-ext-install $(pwd)/swoole-1.9.23 \
+    && apt-get install -y python librdkafka-dev \
+    && pecl install rdkafka-3.1.2 \
+    && docker-php-ext-enable rdkafka \
+    && apt-get install -y libmemcached-dev \
+    && tar -zxvf memcached-2.2.0.tgz \
+    && docker-php-ext-configure $(pwd)/memcached-2.2.0 \
+    && docker-php-ext-install $(pwd)/memcached-2.2.0 \
+    && apt-get install -y libssl-dev \
+    && tar -zxvf zlib-1.2.11.tar.gz \
+    && tar -zxvf pcre-8.12.tar.gz \
+    && tar -zxvf tengine-2.2.3.tar.gz \
+    && cd tengine-2.2.3 \
+    && ./configure --prefix=/data/server/nginx/ --with-http_ssl_module --with-pcre=../pcre-8.12 --with-zlib=../zlib-1.2.11 \
+    && make -j$(nproc) && make install \
+    && cd - \
+    && apt-get clean && cd /data/ \
+    && cp -f /data/workerspace/sysctl.conf /etc/sysctl.conf \
+    && groupadd www && useradd -M -g www www \
+    && cp -f /data/workerspace/php/php.ini /usr/local/etc/php/php.ini \
+    && cp -f /data/workerspace/php/php-fpm.conf /usr/local/etc/php-fpm.conf \
+    && mkdir -p /data/wwwroot/www/ \
+    && chown -R www:www /data/wwwroot/www/ \
+    && mkdir -p /data/wwwlogs/nginx/ \
+    && chown -R www:www /data/wwwlogs/nginx/ \
+    && cp -f /data/workerspace/nginx/nginx.conf /data/server/nginx/conf/nginx.conf \
+    && cp /data/workerspace/start.sh /data/server/ \
+    && chmod u+x /data/server/start.sh \
+    && mkdir -p /data/server/nginx/conf/vhost/ \
+    && cp /data/workerspace/nginx/default.conf /data/server/nginx/conf/vhost/ \
+    && echo "<?php echo \"fky env.\";" > /data/wwwroot/www/index.php \
+    && rm -rf /data/workerspace \
+    && rm -rf /tmp/pear/
+
+EXPOSE 80/tcp 443/tcp 9000/tcp
+#容器启动命令
+CMD ["/data/server/start.sh"]

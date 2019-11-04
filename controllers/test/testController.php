@@ -15,7 +15,9 @@ class TestController extends \controllers\BaseController
   	// $test2->test();
   	loadc('log')->info('good',['good1','good2']);
 
-  	  $data = loadc('db')->select("wx_pintuan_setting", "*",['LIMIT'=>20]);
+  	  $data = loadc('db')->pdo->query('show databases', \PDO::FETCH_ASSOC)->fetchAll();
+  	  var_dump($data);
+  	  die('good2');
   	 // $this->showResponse(200,'',$data,'arr');
       //  	 $response = loadc('HttpRequest')->GET('https://hao.360.cn/?360safe');
 
