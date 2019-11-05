@@ -1,4 +1,6 @@
-**blockPHP一款轻量级PHP MVC框架，也可作为工具包在其他PHP框架中使用**
+**blockPHP一款轻量级PHP MVC框架**
+
+**用于帮助理解php项目功能架构基本原理和解决方案，功能模块解耦，不依赖框架**
 
 **author：FKY**
 
