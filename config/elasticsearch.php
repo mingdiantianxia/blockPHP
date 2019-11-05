@@ -6,8 +6,8 @@ return [
     "address" => [
         'http://elastic:xunxiang125KNGbhga@es-cn-mp9125qxt0006hu0j.elasticsearch.aliyuncs.com:9200',
     ],
-    "username" => "elastic",
-    "password" => "xunxiang125KNGbhga",
+    "username" => "",
+    "password" => "",
     "indexs" => [
         //客户搜索
         'order_customer_index' => [
