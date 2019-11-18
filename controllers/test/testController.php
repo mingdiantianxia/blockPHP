@@ -11,6 +11,13 @@ class TestController extends \controllers\BaseController
   
   public function test()
   {
+      ($result=1 && $mysqlState="master") || $mysqlState="slave";
+      var_dump($mysqlState);
+      die;
+      var_dump(empty($_POST['good']));
+
+      var_dump(isset($_POST['good']));
+      die;
   	// $test2 = new Test2Controller();
   	// $test2->test();
   	loadc('log')->info('good',['good1','good2']);

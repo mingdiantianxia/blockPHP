@@ -1,6 +1,6 @@
 <?php 
 loadc('Router')->setPrefix('\/?');
-loadc('Router')->get('test/', 'controllers\test\TestController@test');
+loadc('Router')->get('test\/?', 'controllers\test\TestController@test');
 loadc('Router')->get('test2/', 'controllers\test\SyncDatabaseController@syncDatabase');
 loadc('Router')->get('vue/', 'controllers\vue\vueController@vue');
 loadc('Router')->get('home/', 'controllers\HomeController@home');
