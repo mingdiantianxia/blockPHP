@@ -1,5 +1,5 @@
 <?php
- namespace fky\classs;
+namespace fky\classs;
 
  /**
   * 函数和类，统一加载类
