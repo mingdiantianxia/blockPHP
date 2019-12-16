@@ -29,7 +29,7 @@ class Macaw {
    */
   public static function __callstatic($method, $params) {
       $filename = dirname($_SERVER['PHP_SELF']);#当前正在执行脚本的文件名
-      if ($filename == '/') {
+      if ($filename == DIRECTORY_SEPARATOR) {
           $filename = '';
       }
     $uri = implode('/', array_filter(array(
