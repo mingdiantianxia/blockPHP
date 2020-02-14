@@ -35,6 +35,21 @@ class Db extends \Medoo\Medoo
         return self::$_instance[$connectName];
     }
 
+    /**
+     * 获取Sql
+     * @param $table
+     * @param $join
+     * @param null $columns
+     * @param null $where
+     * @return mixed|null|string|string[]
+     * @see Medoo::select()
+     */
+    public function getSql($table, $join, $columns = null, $where = null)
+    {
+        $map = [];
+        return $this->generate($this->selectContext($table, $map, $join, $columns, $where), $map);
+    }
+
 }
 
  

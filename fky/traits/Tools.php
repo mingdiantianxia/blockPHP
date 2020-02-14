@@ -237,7 +237,7 @@ trait Tools{
 
         ($res) or die('您使用的私钥格式错误，请检查RSA私钥配置');
         $crypto = '';
-        foreach (str_split(base64_decode($encryptData), 128) as $chunk) {
+        foreach (str_split(base64_decode($encryptData), 256) as $chunk) {
             if (!openssl_private_decrypt($chunk, $decryptData, $res)) {
                 echo "<br/>rsa decrypt error, " . openssl_error_string() . "<br/>";
                 return false;
