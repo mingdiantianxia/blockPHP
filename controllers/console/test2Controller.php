@@ -122,7 +122,7 @@ class Test2Controller extends BaseController
                 $tip2 = '9点到，准备下班回家喝汤咯！';
                 break;
             default:
-                $to_mobile_list = ['15521311931'];
+                $to_mobile_list = ['155XXXXXXXX'];
                 break;
         }
 
@@ -224,7 +224,7 @@ class Test2Controller extends BaseController
         );
 
         $to_list = ["@all"];
-        $to_mobile_list = ["13232720275"];
+        $to_mobile_list = ["132XXXXX"];
         $is_send_text = true;
 
         //提醒的时间列表
@@ -270,7 +270,7 @@ class Test2Controller extends BaseController
                     break;
                 default:
                     $tips = $tips_arr[6];
-                    $to_mobile_list = ['15521311931'];
+                    $to_mobile_list = ['1552XXXXXXX'];
                     break;
             }
 
