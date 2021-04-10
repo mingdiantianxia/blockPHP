@@ -101,7 +101,10 @@
            
         <br>
         <div id="router-url" class="" style="width: 100%;">
-            <a class="btn btn2  btn-success lg" v-for="(item, index) in xianlu" v-bind:href="item.url+url" v-bind:data-xianlu="item.url" v-bind:title="item.title" data-toggle="tooltip" rel="nofollow" target="showframe" style="margin: 10px;">线路{{ index+1 }}</a>
+            <a class="btn btn2  btn-success lg" v-for="(item, index) in xianlu" v-bind:href="item.url+url" v-bind:data-xianlu="item.url" v-bind:title="item.title" data-toggle="tooltip" rel="nofollow" target="showframe" style="margin: 10px;">
+                <template v-if="item.title">{{ item.title }}{{ index+1 }}</template>
+                <template v-else>线路{{ index+1 }}</template>
+            </a>
             <a class="btn btn2  btn-success lg" data-type='zhibo' href="http://www.yswhw.cn/live.php" rel="nofollow" target="showframe" style="margin: 10px;">电视直播</a>
         </div>
         <br>
@@ -154,53 +157,53 @@ $(function(){
             url: '',
             current_xianlu:'http://api.hlglwl.com/jx.php?url=',
             xianlu:[
-                {'url':"http://api.hlglwl.com/jx.php?url=", title: "腾讯,优酷,爱奇艺(不稳定)" },
-                {'url':"https://jiexi.071811.cc/jx.php?url=", title: "综合线路" },
-                {'url':"http://q.z.vip.totv.72du.com/?url=", title: "综合线路" },
-                {'url':"http://jx.52dgm.cn/?url=", title: "" },
-                {'url':"http://jiexi.92fz.cn/player/vip.php?url=", title: "" },
-                {'url':"http://jx.aeidu.cn/index.php?url=", title: "" },
-                {'url':"https://jx.wslmf.com/?url=", title: "(支持B站)" },
-                {'url':"http://jx.ot7.cn/?url=", title: "(支持B站)" },
+                // {'url':"http://api.hlglwl.com/jx.php?url=", title: "腾讯,优酷,爱奇艺(不稳定)" },
+                // {'url':"https://jiexi.071811.cc/jx.php?url=", title: "综合线路" },
+                // {'url':"http://q.z.vip.totv.72du.com/?url=", title: "综合线路" },
+                // {'url':"http://jx.52dgm.cn/?url=", title: "" },
+                // {'url':"http://jiexi.92fz.cn/player/vip.php?url=", title: "" },
+                // {'url':"http://jx.aeidu.cn/index.php?url=", title: "" },
+                // {'url':"https://jx.wslmf.com/?url=", title: "(支持B站)" },
+                // {'url':"http://jx.ot7.cn/?url=", title: "(支持B站)" },
+                // {'url':"https://yun.odflv.com/?url=", title: "" },
+                // {'url':"http://app.baiduoos.cn:2019/vip/?url=", title: "" },
+                // {'url':"https://jx.wawakj.top/?url=", title: "" },
+                // {'url':"http://api.oopw.top/?url=", title: "综合线路(支持B站)" },
+                // { url: "https://jqaaa.com/jx.php?url=", title: "综合线路" },
+                // { url: "https://ejiafarm.com/jx.php?url=", title: "" },
+                // { url: "https://030e.com/0302/?url=", title: "综合线路" },
+                // { url: "http://api.smq1.com/?url=", title: "" },
+                // { url: "http://api.zuilingxian.com/jiexi.php?url=", title: "" },
+                // { url: "http://www.luckyblank.cn/wuxinjx/?url=", title: "" },
+                // { url: "http://api.wlzhan.com/sudu/?url=", title: "" },
+                // { url: "http://beaacc.com/api.php?url=", title: "综合线路" },
+                // { url: "http://2gty.com/apiurl/yun.php?url=", title: "综合线路(支持B站)" },
+                // { url: "http://jx.anlehe.com/jx.php?url=", title: "综合线路" },
+                // { url: "https://jx.hezeshi.net/ce/jlexi.php?url=", title: "" },
+                // { url: "http://api.7kki.cn/api/?url=", title: "腾讯" },
+                // { url: "https://www.myxin.top/jx/api/?url=", title: "综合线路" },
+                // { url: "http://jx.ovov.cc/?url=", title: "综合线路" },
+                // { url: "http://jx.618ge.com/?url=", title: "综合线路" },
+
+                // { url: "http://jx.598110.com/zuida.php?url=", title: "综合线路" },
+                // { url: "http://jx.598110.com/duo/index.php?url=", title: "综合线路" },
+                // { url: "http://jx.598110.com/index.php?url=", title: "综合线路" },
+                // { url: "http://jx.598110.com/?url=", title: "综合线路" },
+                // { url: "http://vip.jlsprh.com/v/4.php?url=", title: "" },
+                // { url: "http://jx.zzit.cc/tv.php?url=", title: "" },
+
                 {'url':"http://jqaaa.com/jq3/?url=", title: "" },
-                {'url':"https://yun.odflv.com/?url=", title: "" },
-                {'url':"http://app.baiduoos.cn:2019/vip/?url=", title: "" },
-                {'url':"https://jx.wawakj.top/?url=", title: "" },
                 {'url':"https://api.sigujx.com/?url=", title: "" },
-                {'url':"http://api.oopw.top/?url=", title: "综合线路(支持B站)" },
                 { url: "http://www.sfsft.com/admin.php?url=", title: "综合线路" },
                 { url: "http://www.wmxz.wang/video.php?url=", title: "综合线路" },
-
-                { url: "http://jx.598110.com/zuida.php?url=", title: "综合线路" },
-                { url: "http://jx.598110.com/duo/index.php?url=", title: "综合线路" },
-                { url: "http://jx.598110.com/index.php?url=", title: "综合线路" },
-                { url: "http://jx.598110.com/?url=", title: "综合线路" },
-
-                { url: "http://jx.zzit.cc/tv.php?url=", title: "" },
                 { url: "http://www.1717yun.com/jx/ty.php?url=", title: "" },
-                { url: "http://vip.jlsprh.com/v/4.php?url=", title: "" },
-                { url: "https://z1.m1907.cn/?jx=", title: "综合线路" },
-                { url: "https://jqaaa.com/jx.php?url=", title: "综合线路" },
-                { url: "https://ejiafarm.com/jx.php?url=", title: "" },             
-                { url: "https://030e.com/0302/?url=", title: "综合线路" },
-                { url: "http://api.smq1.com/?url=", title: "" },
-                { url: "http://api.zuilingxian.com/jiexi.php?url=", title: "" },
-                { url: "http://www.luckyblank.cn/wuxinjx/?url=", title: "" },
-                { url: "http://api.wlzhan.com/sudu/?url=", title: "" },
-                { url: "http://beaacc.com/api.php?url=", title: "综合线路" },
-                { url: "http://2gty.com/apiurl/yun.php?url=", title: "综合线路(支持B站)" },
-                { url: "http://jx.anlehe.com/jx.php?url=", title: "综合线路" },
+                { url: "https://z1.m1907.cn/?jx=", title: "m1907综合" },
                 { url: "http://jx.cesms.cn/?url=", title: "综合线路(支持B站)" },
-
                 { url: "https://jx.618g.com/?url=", title: "综合线路" },
-                { url: "https://jx.hezeshi.net/ce/jlexi.php?url=", title: "" },
-                { url: "http://api.7kki.cn/api/?url=", title: "腾讯" },
                 { url: "https://cdn.yangju.vip/k/?url=", title: "综合线路" },
-                { url: "https://www.myxin.top/jx/api/?url=", title: "综合线路" },
-                { url: "http://jx.ovov.cc/?url=", title: "综合线路" },
-                { url: "http://jx.618ge.com/?url=", title: "综合线路" },
-
                 { url: "http://j.zz22x.com/jx/?url=", title: "综合线路" },
+
+                { url: "https://dplayerx.com/m3u8.php?url=", title: "久久资源网" },
             ],
             search_type:1,
             search_url:{
