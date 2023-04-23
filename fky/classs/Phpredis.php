@@ -175,7 +175,7 @@ class Phpredis
      * @param int $expire         -   过期时间，单位秒
      * @return bool 成功返回true
      */
-    public function set($key, $value, $expire = 0, $dependency = null)
+    public function set($key, $value, $expire = 0)
     {
         if ($expire > 0) {
             return $this->_redis->set($key, $value, $expire);

@@ -1,0 +1,67 @@
+#!/usr/bin/env php
+<?php
+namespace fky\cli;
+
+/**
+ * @author fukaiyao 2020-1-10 19:37:28
+ */
+
+/*使用linux的crontab配置定时任务*/
+
+//脚本命令文件初始化
+// fix for fcgi
+defined('STDIN') or define('STDIN', fopen('php://stdin', 'r'));
+
+require_once '..'.DIRECTORY_SEPARATOR.'FkyLoad.php';
+//定义项目根目录
+define('FKY_PROJECT_PATH',  __DIR__ .DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR);
+
+//初始化配置参数
+//php命令
+$phpPath = loadc('config')->get("php", "cron");
+//项目目录
+$projectPath = FKY_PROJECT_PATH;
+//进程运行角色
+$uid = loadc('config')->get("user", "cron");
+
+
+//定制任务配置
+//# Example of job definition:
+//# .---------------- minute (0 - 59)
+//# |  .------------- hour (0 - 23)
+//# |  |  .---------- day of month (1 - 31)
+//# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+//# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+//# |  |  |  |  |
+//# *  *  *  *  * user-name  command to be executed
+
+$options = getopt('d');
+if (isset($options['d'])) { //清空定时任务
+    $crontab = '';
+} else {
+    //定时任务
+    $jobs = loadc('config')->get("jobs", "cron");
+
+    if (!is_array($jobs) || empty($jobs)) {
+        die('cron jobs is empty!');
+    }
+
+    $dir = date('Ym');
+    if (!is_dir($projectPath . 'data/log/' . $dir)) {
+        mkdir($projectPath . 'data/log/' . $dir);
+    }
+    $day = date('d');
+
+    $str = <<< EOT
+#%s
+%s {$uid} {$phpPath} {$projectPath}fky/cli/fkycmd %s &>> {$projectPath}data/log/{$dir}/{$day}_cli.log
+EOT;
+
+    $crontab = '';
+    foreach ($jobs as $job) {
+        $crontab .= vsprintf($str, [$job['title'], $job['cron'], $job['command']]) . PHP_EOL;
+    }
+}
+
+//安装定时任务
+loadf('installCrontab');

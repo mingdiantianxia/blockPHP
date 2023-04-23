@@ -192,7 +192,7 @@ class DbEventFullSyncWorker
 
 
     /**
-     * 添加同步任务
+     * 添加同步任务（表）
      * @param string $table - 表名
      * @param string $listenerId - 监听器id
      * @param string $pk - 主键id
@@ -213,7 +213,7 @@ class DbEventFullSyncWorker
     }
 
     /**
-     * 删除同步任务
+     * 删除同步任务（表）
      * @param $table
      * @return string
      */
@@ -228,6 +228,14 @@ class DbEventFullSyncWorker
         unset($this->_status[$table]);
     }
 
+    /**
+     * 添加同步子任务（表的切片任务）
+     * @param $listenerId
+     * @param $pk
+     * @param $beginOffset
+     * @param $endOffset
+     * @param bool $historyTask
+     */
     private function _addConcurrencyTask($listenerId, $pk, $beginOffset, $endOffset, $historyTask = false)
     {
         $msg = ['beginOffset' => $beginOffset, 'endOffset' => $endOffset];
@@ -241,13 +249,17 @@ class DbEventFullSyncWorker
         $this->_runningTask[$taskId] = $msg;
     }
 
+    /**
+     *
+     * @param $taskId
+     */
     public function clearRunningStatus($taskId)
     {
         unset($this->_runningTask[$taskId]);
     }
 
     /**
-     * 处理并发子任务, 当前任务不要依赖$this->_status和$this->_currentSyncTable, $this->_runningTask变量。
+     * 处理同步子任务（表的切片任务）, 当前任务不要依赖$this->_status和$this->_currentSyncTable, $this->_runningTask变量。
      * @param $msg
      * @return mixed
      */
@@ -304,6 +316,11 @@ class DbEventFullSyncWorker
         return $msg;
     }
 
+    /**
+     * 调用任务监听器
+     * @param $listenerId
+     * @param $evs
+     */
     private function _callListener($listenerId, $evs)
     {
         $listenConf = $this->_conf['listeners'][$listenerId];
@@ -328,6 +345,10 @@ class DbEventFullSyncWorker
         }
     }
 
+    /**
+     * 切片同步子任务完成
+     * @param $msg
+     */
     public function finishConcurrencyTask($msg)
     {
         if (empty($msg) || !is_array($msg) || !isset($msg['beginOffset']) || !isset($msg['endOffset'])) {
@@ -356,6 +377,9 @@ class DbEventFullSyncWorker
         }
     }
 
+    /**
+     * 加载最大最小id
+     */
     private function _reloadMaxOffset()
     {
         $status = $this->_status[$this->_currentSyncTable];
@@ -375,6 +399,10 @@ class DbEventFullSyncWorker
         }
     }
 
+    /**
+     * 表同步任务完成
+     * @param $table
+     */
     private function _completeTask($table)
     {
         if (empty($table)) {
@@ -387,6 +415,9 @@ class DbEventFullSyncWorker
         $this->deleteTask($table);
     }
 
+    /**
+     * 下一个表同步任务
+     */
     private function _selectNextTask()
     {
         $this->_runningTask = [];

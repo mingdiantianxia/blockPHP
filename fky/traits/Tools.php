@@ -19,6 +19,11 @@ trait Tools{
 		return $s;
 	}
 
+    private function rad($d)
+    {
+        return $d * M_PI / 180.0;
+    }
+
 
 	    /**
      * 检查手机号所属运营商
@@ -245,6 +250,16 @@ trait Tools{
             $crypto .= $decryptData;
         }
         return $crypto;
+    }
+
+    /**
+     * 生成请求串号
+     * @return int
+     */
+    public function getRequestId()
+    {
+        $us = strstr(microtime(), ' ', true);
+        return intval(strval($us * 1000 * 1000) . rand(100, 999));
     }
 
 }

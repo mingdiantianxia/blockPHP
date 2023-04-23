@@ -13,7 +13,7 @@ function XssFilter($input, $tags = true, $trim = true) {
         foreach($input as $key => &$value)
         {
             if (is_array($value)) {
-                $value = $this->XssFilter($value);
+                $value = XssFilter($value);
             } else {
                 //去除字符串中两边多余的空格，剥去HTML、XML以及PHP的标签，转为html实体
                 if ($trim) {

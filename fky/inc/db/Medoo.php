@@ -516,7 +516,7 @@ class Medoo
 
     protected function columnQuote($string)
     {
-        if (!preg_match('/^[a-zA-Z0-9_]+(\.?[a-zA-Z0-9_]+)?$/i', $string))
+        if (!preg_match('/^[a-zA-Z0-9_]+(\.?[a-zA-Z0-9_-]+)?$/i', $string))
         {
             throw new InvalidArgumentException("Incorrect column name \"$string\"");
         }

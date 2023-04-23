@@ -16,13 +16,16 @@
                $callf = explode(':', $name);
                $name = $callf[1];
             }
-            $func =  dirname(__FILE__).DIRECTORY_SEPARATOR.'func'.DIRECTORY_SEPARATOR. $name . '.php';
 
-            if (!is_file($func)) {
-                die(' function ' . $name . ' Not Found!');
-            }
-            require_once $func;
             $function = "fky\\func\\".$name;
+            if (!function_exists($function)) {
+                $func =  dirname(__FILE__).DIRECTORY_SEPARATOR.'func'.DIRECTORY_SEPARATOR. $name . '.php';
+
+                if (!is_file($func)) {
+                    die(' function ' . $name . ' Not Found!');
+                }
+                require_once $func;
+            }
 
             if ($call_exist === 0) {
                 return $function;
@@ -46,13 +49,16 @@
         if (isset($fky_modules[$name])) {
             return $fky_modules[$name];
         }
-        $class =  dirname(__FILE__).DIRECTORY_SEPARATOR.'classs'.DIRECTORY_SEPARATOR. $name . '.php';
 
-        if (!is_file($class)) {
-            die(' class ' . $name . ' Not Found!');
-        }
-        require_once $class;
         $class_name = "fky\\classs\\" . ucfirst($name);
+        if (!class_exists($class_name)) {
+            $class =  dirname(__FILE__).DIRECTORY_SEPARATOR.'classs'.DIRECTORY_SEPARATOR. $name . '.php';
+
+            if (!is_file($class)) {
+                die(' class ' . $name . ' Not Found!');
+            }
+            require_once $class;
+        }
 
         $class_name = new \ReflectionClass($class_name);//反射类
         $fky_modules[$name] = $class_name->newInstanceArgs($arguments);//传入参数

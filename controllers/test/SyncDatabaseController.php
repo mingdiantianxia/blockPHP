@@ -17,9 +17,13 @@ class SyncDatabaseController extends BaseController
         set_time_limit(0);
 
         //需要同步的数据库数组
-        $syncDatabaseArr = ['agent', 'jinxiaocun', 'lsjinxiaocun', 'lssystem', 'platform', 'weixin'];
+        $syncDatabaseArr = [
+            'dev_erp2',
+            'dev_uc'
+        ];
+
         //每个数据表最大条数
-        $limit = 500;
+        $limit = 10000;
 
         $dbInstance = LoadFactory::lc('db', Config::getInstance()->get('db', 'config'));
 
@@ -50,6 +54,17 @@ class SyncDatabaseController extends BaseController
                         continue;
                     }
 
+                    if (in_array($tableName,[
+                        'ads_operation_record_sp操作日志',
+                        'mws_transaction_month_profit_statis_20211020_bak',
+                        'mws_transaction_month_profit_statis_2021-10-22',
+                        'ads_operation_record_SP操作日志'
+                    ])) {
+                        $redis->hSet($redis_key, $database['Database'] . '_' . $tableName, 1, 86400);
+                        var_dump($tableName);
+                        continue;
+                    }
+
                     //创建数据库
                     $slaveDbConfig = Config::getInstance()->get('slaveDb', 'config');
                     $conn = mysqli_connect($slaveDbConfig['server'], $slaveDbConfig['username'], $slaveDbConfig['password']);
@@ -62,9 +77,9 @@ class SyncDatabaseController extends BaseController
                     $createTableSql = str_replace('"', '`', $createTableSql);
 
                     //去除不正确的时间默认值
-                    $createTableSql = preg_replace(["/datetime NOT NULL DEFAULT '[-0-9]*\s?[:0-9]*'/Us", "/datetime DEFAULT '[-0-9]*\s?[:0-9]*'/Us"], "datetime DEFAULT NULL", $createTableSql);
-                    $createTableSql = preg_replace(["/timestamp NOT NULL DEFAULT '[-0-9]*\s?[:0-9]*'/Us", "/timestamp DEFAULT '[-0-9]*\s?[:0-9]*'/Us"], "timestamp DEFAULT NULL", $createTableSql);
-                    $createTableSql = preg_replace(["/date NOT NULL DEFAULT '[-0-9]*\s?[:0-9]*'/Us", "/date DEFAULT '[-0-9]*\s?[:0-9]*'/Us"], "date DEFAULT NULL", $createTableSql);
+//                    $createTableSql = preg_replace(["/datetime NOT NULL DEFAULT '[-0-9]*\s?[:0-9]*'/Us", "/datetime DEFAULT '[-0-9]*\s?[:0-9]*'/Us"], "datetime DEFAULT NULL", $createTableSql);
+//                    $createTableSql = preg_replace(["/timestamp NOT NULL DEFAULT '[-0-9]*\s?[:0-9]*'/Us", "/timestamp DEFAULT '[-0-9]*\s?[:0-9]*'/Us"], "timestamp DEFAULT NULL", $createTableSql);
+//                    $createTableSql = preg_replace(["/date NOT NULL DEFAULT '[-0-9]*\s?[:0-9]*'/Us", "/date DEFAULT '[-0-9]*\s?[:0-9]*'/Us"], "date DEFAULT NULL", $createTableSql);
 
                     mysqli_select_db($conn, $database['Database']);
                     mysqli_query($conn, "SET NAMES utf8");//设置字符集，防止插入数据时中文乱码

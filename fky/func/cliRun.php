@@ -9,7 +9,8 @@ namespace fky\func;
  */
 function cliRun($path, $namespace="\\") {
     global $argc,$argv;
-	$return_arr = array(
+    static $modules = array();
+    $return_arr = array(
 				'code'=> -1,
 				'msg'=> 'false',
 				'data'=>''
@@ -33,14 +34,6 @@ function cliRun($path, $namespace="\\") {
 		return $return_arr;
 	} 
 	else {
-		//加载类文件
-	    $class_file =  $path . $class_name . 'Controller.php';
-	    if (!is_file($class_file)) {
-	        $return_arr['msg'] = ' class ' . $class_name . ' Not Found!';
-			return $return_arr;
-	    }
-	    require_once $class_file;
-	    
 	    //检测命名空间
 	    if ($namespace != "\\") {
 	    	$namespace = trim($namespace,"\\");
@@ -53,15 +46,47 @@ function cliRun($path, $namespace="\\") {
 	    
 	    //带命名空间的类名
 	    $class_name = $namespace . $class_name . 'Controller';
-	    $instance = new $class_name;
-	    if ($result = call_user_func_array ([$instance, $func_name], $arguments)) { //调用函数，并传递参数
-                $return_arr['code'] = 200;
-                $return_arr['msg'] = 'success';
-		    	$return_arr['data'] = $result;
-				return $return_arr;
-	    } else {
-	    	$return_arr['msg'] = $class_name . '::'.$func_name . ' no return true ';
-	    	return $return_arr;
-	 	}
+
+        if (!class_exists($class_name)) {
+            //加载类文件
+            $class_file =  $path . $class_name . 'Controller.php';
+            if (!is_file($class_file)) {
+                $return_arr['msg'] = ' class ' . $class_name . ' Not Found!';
+                return $return_arr;
+            }
+            require_once $class_file;
+        }
+
+        try{
+            //检查类和方法是否正确
+            if (!class_exists($class_name)) {
+                $returnArr['msg'] = $class_name . ' does not exist! ';
+                return $returnArr;
+            }
+
+            if (!isset($modules[$class_name])) {
+                $modules[$class_name] = new $class_name;
+            }
+            $instance = $modules[$class_name];
+            if (!method_exists($instance, $func_name)) {
+                $return_arr['msg'] = $class_name . '::' . $func_name . ' does not exist! ';
+                return $return_arr;
+            }
+
+            //调用函数，并传递参数
+            $result = call_user_func_array ([$instance, $func_name], $arguments);
+            unset($instance);
+
+            $return_arr['code'] = 200;
+            $return_arr['msg'] = 'success';
+            $return_arr['data'] = $result?$result:'';
+            return $return_arr;
+        } catch (\Exception $e) {
+            $return_arr['msg'] = $e->getMessage() . "[" . $e->getFile() . ':' . $e->getLine() . "]";
+            return $return_arr;
+        } catch (\Error $e) {
+            $return_arr['msg'] = $e->getMessage() . "[" . $e->getFile() . ':' . $e->getLine() . "]";
+            return $return_arr;
+        }
 	}
 }

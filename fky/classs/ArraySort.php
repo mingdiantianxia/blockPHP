@@ -60,7 +60,7 @@ class ArraySort
             $parameters = array();
             foreach($loadFields["field"] as $sortfield) {
                 $array_data = $loadFields["data"][$sortfield["name"]];
-                $caseSensitve = ( $sortfield["caseSensitve"] === null ) ? $sortfield["caseSensitve"] : false;
+                $caseSensitve = ( $sortfield["caseSensitve"] !== null ) ? $sortfield["caseSensitve"] : false;
                 if (!$caseSensitve) $array_data = array_map('strtolower', $array_data);
                 $parameters[] = $array_data;
                 if ( $sortfield["order"] !== null ) $parameters[] = ( $sortfield["order"] ) ? SORT_ASC : SORT_DESC;
